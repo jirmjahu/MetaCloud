@@ -12,16 +12,15 @@ import eu.metacloudservice.storage.UUIDDriver;
 import io.netty.channel.Channel;
 
 public class HandlePacketOutPlayerSwitchService implements NettyAdaptor {
+
     @Override
     public void handle(Channel channel, Packet packet) {
-        if (packet instanceof PacketOutPlayerSwitchService){
-
-            if (!CloudAPI.getInstance().getPlayerPool().playerIsNotNull(((PacketOutPlayerSwitchService) packet).getName())){
+        if (packet instanceof PacketOutPlayerSwitchService) {
+            if (!CloudAPI.getInstance().getPlayerPool().playerIsNotNull(((PacketOutPlayerSwitchService) packet).getName())) {
                 CloudAPI.getInstance().getAsyncPlayerPool().registerPlayer(new AsyncCloudPlayer(((PacketOutPlayerSwitchService) packet).getName(), UUIDDriver.getUUID(((PacketOutPlayerSwitchService) packet).getName())));
                 CloudAPI.getInstance().getPlayerPool().registerPlayer(new CloudPlayer(((PacketOutPlayerSwitchService) packet).getName(), UUIDDriver.getUUID(((PacketOutPlayerSwitchService) packet).getName())));
                 CloudAPI.getInstance().getEventDriver().executeEvent(new CloudPlayerConnectedEvent(((PacketOutPlayerSwitchService) packet).getName(), CloudAPI.getInstance().getPlayerPool().getPlayer(((PacketOutPlayerSwitchService) packet).getName()).getProxyServer().getName(), UUIDDriver.getUUID(((PacketOutPlayerSwitchService) packet).getName())));
             }
-
             CloudAPI.getInstance().getEventDriver().executeEvent(new CloudPlayerSwitchEvent(((PacketOutPlayerSwitchService) packet).getName(), UUIDDriver.getUUID(((PacketOutPlayerSwitchService) packet).getName()), ((PacketOutPlayerSwitchService) packet).getFrom(), ((PacketOutPlayerSwitchService) packet).getServer()));
         }
     }

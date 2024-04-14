@@ -8,9 +8,10 @@ import eu.metacloudservice.networking.packet.packets.out.service.events.PacketOu
 import io.netty.channel.Channel;
 
 public class HandlePacketOutCloudProxyCouldNotStartEvent implements NettyAdaptor {
+
     @Override
     public void handle(Channel channel, Packet packet) {
-        if (packet instanceof PacketOutCloudProxyCouldNotStartEvent){
+        if (packet instanceof PacketOutCloudProxyCouldNotStartEvent) {
             CloudAPI.getInstance().getEventDriver().executeEvent(new CloudProxyCouldNotStartEvent(((PacketOutCloudProxyCouldNotStartEvent) packet).getName()));
         }
     }

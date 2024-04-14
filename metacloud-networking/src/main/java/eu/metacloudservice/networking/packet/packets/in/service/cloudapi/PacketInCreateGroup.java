@@ -1,7 +1,3 @@
-/*
- * this class is by RauchigesEtwas
- */
-
 package eu.metacloudservice.networking.packet.packets.in.service.cloudapi;
 
 import eu.metacloudservice.networking.packet.NettyBuffer;

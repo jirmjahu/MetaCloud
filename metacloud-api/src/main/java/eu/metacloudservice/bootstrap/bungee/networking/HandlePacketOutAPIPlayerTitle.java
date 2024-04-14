@@ -8,21 +8,24 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import eu.metacloudservice.networking.packet.NettyAdaptor;
 import eu.metacloudservice.networking.packet.Packet;
+
 public class HandlePacketOutAPIPlayerTitle implements NettyAdaptor {
+
     @Override
     public void handle(Channel channel, Packet packet) {
-        if (packet instanceof PacketOutAPIPlayerTitle){
-            if (ProxyServer.getInstance().getPlayer(((PacketOutAPIPlayerTitle) packet).getUsername()).isConnected()){
-                ProxiedPlayer player = ProxyServer.getInstance().getPlayer(((PacketOutAPIPlayerTitle) packet).getUsername());
-                Title title = ProxyServer.getInstance().createTitle();
-                title.title(new TextComponent(((PacketOutAPIPlayerTitle) packet).getTitle()));
-                title.subTitle(new TextComponent(((PacketOutAPIPlayerTitle) packet).getSubTitle()));
-                title.fadeIn(((PacketOutAPIPlayerTitle) packet).getFadeIn());
-                title.stay(((PacketOutAPIPlayerTitle) packet).getStay());
-                title.fadeOut(((PacketOutAPIPlayerTitle) packet).getFadeOut());
-                player.sendTitle(title);
+        if (packet instanceof PacketOutAPIPlayerTitle) {
+            var player = ProxyServer.getInstance().getPlayer(((PacketOutAPIPlayerTitle) packet).getUsername());
+            if (!player.isConnected()) {
+                return;
             }
+            var title = ProxyServer.getInstance().createTitle();
+            var titlePacket = (PacketOutAPIPlayerTitle) packet;
+            title.title(new TextComponent(titlePacket.getTitle()));
+            title.subTitle(new TextComponent(titlePacket.getSubTitle()));
+            title.fadeIn(titlePacket.getFadeIn());
+            title.stay(titlePacket.getStay());
+            title.fadeOut(titlePacket.getFadeOut());
+            player.sendTitle(title);
         }
-
     }
 }

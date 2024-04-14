@@ -13,13 +13,12 @@ public class BukkitBootstrap extends JavaPlugin {
     @Override
     public void onLoad() {
         new CloudAPI(false);
-
     }
 
     @Override
     public void onDisable() {
         Bukkit.getOnlinePlayers().forEach(player -> player.kickPlayer("cloudservice-shutdown"));
-        LiveService service = (LiveService) new ConfigDriver("./CLOUDSERVICE.json").read(LiveService.class);
+        var service = (LiveService) new ConfigDriver("./CLOUDSERVICE.json").read(LiveService.class);
         NettyDriver.getInstance().nettyClient.sendPacketSynchronized(new PacketInServiceDisconnect(service.getService()));
     }
 }

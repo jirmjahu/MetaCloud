@@ -6,6 +6,7 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.YamlConfiguration;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -30,7 +31,6 @@ public class ServerConfig {
         if (locked) {
             return;
         }
-
         bungeeConfig.set("servers." + serverInfo.getName() + ".motd", serverInfo.getMotd().replace(ChatColor.COLOR_CHAR, '&'));
         bungeeConfig.set("servers." + serverInfo.getName() + ".address", serverInfo.getSocketAddress().toString());
         bungeeConfig.set("servers." + serverInfo.getName() + ".restricted", false);
@@ -58,7 +58,7 @@ public class ServerConfig {
             return;
         }
         List<String> b = bungeeConfig.getStringList("listeners.priorities");
-        if (b.contains(lobby)){
+        if (b.contains(lobby)) {
             b.remove(lobby);
         }
         bungeeConfig.set("listeners.priorities", b);
@@ -67,10 +67,6 @@ public class ServerConfig {
         saveConfig();
 
     }
-
-
-
-
 
     public static void removeFromConfig(ServerInfo serverInfo) {
         removeFromConfig(serverInfo.getName());
@@ -85,13 +81,10 @@ public class ServerConfig {
         saveConfig();
     }
 
-
-
     private static void saveConfig() {
         if (locked) {
             return;
         }
-
         try {
             YamlConfiguration.getProvider(YamlConfiguration.class).save(bungeeConfig, file);
         } catch (IOException e) {
@@ -100,29 +93,28 @@ public class ServerConfig {
     }
 
     private static void setupConfig() {
-        FileInputStream fis = null;
-        InputStreamReader isr = null;
+        FileInputStream fileInputStream = null;
+        InputStreamReader inputStreamReader = null;
         try {
             file = new File(ProxyServer.getInstance().getPluginsFolder().getParentFile(), "config.yml");
-
-            fis = new FileInputStream(file);
-            isr = new InputStreamReader(fis, StandardCharsets.ISO_8859_1);
-
-            bungeeConfig = YamlConfiguration.getProvider(YamlConfiguration.class).load(isr);
+            fileInputStream = new FileInputStream(file);
+            inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.ISO_8859_1);
+            bungeeConfig = YamlConfiguration.getProvider(YamlConfiguration.class).load(inputStreamReader);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             try {
-                if (fis != null) {
-                    fis.close();
+                if (fileInputStream != null) {
+                    fileInputStream.close();
                 }
 
-                if (isr != null) {
-                    isr.close();
+                if (inputStreamReader != null) {
+                    inputStreamReader.close();
                 }
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+
+            }
         }
-
         locked = bungeeConfig == null;
     }
 }

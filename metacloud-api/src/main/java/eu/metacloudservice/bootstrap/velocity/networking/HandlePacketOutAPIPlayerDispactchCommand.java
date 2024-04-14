@@ -9,15 +9,19 @@ import eu.metacloudservice.networking.packet.Packet;
 import java.util.concurrent.ExecutionException;
 
 public class HandlePacketOutAPIPlayerDispactchCommand implements NettyAdaptor {
+
     @Override
     public void handle(Channel channel, Packet packet) {
         if (packet instanceof PacketOutAPIPlayerDispactchCommand) {
-            if (VelocityBootstrap.proxyServer.getPlayer(((PacketOutAPIPlayerDispactchCommand) packet).getUserName()).isPresent()){
-                try {
-                    VelocityBootstrap.proxyServer.getCommandManager().executeAsync( VelocityBootstrap.proxyServer.getPlayer(((PacketOutAPIPlayerDispactchCommand) packet).getUserName()).get(), ((PacketOutAPIPlayerDispactchCommand) packet).getCommand()).get();
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
+            var player = VelocityBootstrap.proxyServer.getPlayer(((PacketOutAPIPlayerDispactchCommand) packet).getUserName());
+            if (player.isEmpty()) {
+                return;
+            }
+            try {
+                VelocityBootstrap.proxyServer.getCommandManager().executeAsync(player.get(),
+                        ((PacketOutAPIPlayerDispactchCommand) packet).getCommand()).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
             }
         }
     }

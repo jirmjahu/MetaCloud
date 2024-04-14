@@ -1,7 +1,3 @@
-/*
- * this class is by RauchigesEtwas
- */
-
 package eu.metacloudservice.pool.group;
 
 import eu.metacloudservice.CloudAPI;
@@ -20,44 +16,42 @@ import java.util.stream.Collectors;
 
 public class GroupPool {
 
-    public GroupPool() {}
-
-    public ArrayDeque<String> getGroupsByName(){
-        GroupList cech = (GroupList) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudgroup/general"), GroupList.class);
-        return cech.getGroups();
+    public ArrayDeque<String> getGroupsByName() {
+        var groupList = (GroupList) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudgroup/general"), GroupList.class);
+        return groupList.getGroups();
     }
-    public ArrayList<Group> getGroups(){
+
+    public ArrayList<Group> getGroups() {
         ArrayList<Group> groups = new ArrayList<>();
-        GroupList cech = (GroupList) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudgroup/general"), GroupList.class);
-        cech.getGroups().forEach(s -> {
-            Group g = (Group) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudgroup/" + s), Group.class);
-            groups.add(g);
+        var groupList = (GroupList) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudgroup/general"), GroupList.class);
+        groupList.getGroups().forEach(it -> {
+            Group group = (Group) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudgroup/" + it), Group.class);
+            groups.add(group);
         });
         return groups;
     }
 
-    public boolean isGroupExists(String group){
+    public boolean isGroupExists(String group) {
         return getGroupsByName().stream().anyMatch(s -> s.equalsIgnoreCase(group));
     }
 
-    public void createGroup(Group group){
+    public void createGroup(Group group) {
         CloudAPI.getInstance().sendPacketSynchronized(new PacketInCreateGroup(new ConfigDriver().convert(group)));
     }
 
-    public void deleteGroup(String group){
+    public void deleteGroup(String group) {
         CloudAPI.getInstance().sendPacketSynchronized(new PacketInDeleteGroup(group));
     }
 
-
-    public void stopGroup(String group){
+    public void stopGroup(String group) {
         CloudAPI.getInstance().sendPacketSynchronized(new PacketInStopGroup(group));
     }
 
-    public Group getGroup(String group){
+    public Group getGroup(String group) {
         return getGroups().stream().filter(group1 -> group1.getGroup().equalsIgnoreCase(group)).findFirst().orElse(null);
     }
 
-    public List<Group> getGroups(String[] group){
+    public List<Group> getGroups(String[] group) {
         return getGroups().stream().filter(group1 -> Arrays.stream(group).anyMatch(s -> s.equalsIgnoreCase(group1.getGroup()))).collect(Collectors.toList());
     }
 }

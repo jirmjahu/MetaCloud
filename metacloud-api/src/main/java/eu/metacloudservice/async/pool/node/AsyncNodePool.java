@@ -1,7 +1,4 @@
-package eu.metacloudservice.async.pool.node;/*
- * this class is by RauchigesEtwas
- */
-
+package eu.metacloudservice.async.pool.node;
 
 import eu.metacloudservice.pool.node.entrys.CloudNode;
 
@@ -17,27 +14,23 @@ public class AsyncNodePool {
         this.connectedNodes = connectedNodes;
     }
 
-
     public CompletableFuture<List<CloudNode>> getNodes() {
-        return CompletableFuture.supplyAsync(()->connectedNodes);
+        return CompletableFuture.supplyAsync(() -> connectedNodes);
     }
 
     public CompletableFuture<List<String>> getNodesByName() {
-        return CompletableFuture.supplyAsync( () ->connectedNodes.stream().map(CloudNode::getNodeName).toList());
+        return CompletableFuture.supplyAsync(() -> connectedNodes.stream().map(CloudNode::getNodeName).toList());
     }
 
-    public CompletableFuture<CloudNode> getNode(String node){
-        return CompletableFuture.supplyAsync( () ->connectedNodes.stream().filter(cloudNode -> cloudNode.getNodeName().equals(node)).findFirst().orElse(null));
+    public CompletableFuture<CloudNode> getNode(String node) {
+        return CompletableFuture.supplyAsync(() -> connectedNodes.stream().filter(cloudNode -> cloudNode.getNodeName().equals(node)).findFirst().orElse(null));
     }
 
-    public void register(CloudNode cloudNode){
+    public void register(CloudNode cloudNode) {
         this.connectedNodes.add(cloudNode);
     }
 
-    public void unregisterNode(String node){
+    public void unregisterNode(String node) {
         connectedNodes.removeIf(cloudNode -> cloudNode.getNodeName().equals(node));
     }
-
-
-
 }

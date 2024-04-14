@@ -1,7 +1,4 @@
-package eu.metacloudservice.pool.node;/*
- * this class is by RauchigesEtwas
- */
-
+package eu.metacloudservice.pool.node;
 
 import eu.metacloudservice.pool.node.entrys.CloudNode;
 
@@ -24,14 +21,15 @@ public class NodePool {
         return connectedNodes.stream().map(CloudNode::getNodeName).toList();
     }
 
-    public CloudNode getNode(String node){
+    public CloudNode getNode(String node) {
         return connectedNodes.stream().filter(cloudNode -> cloudNode.getNodeName().equals(node)).findFirst().orElse(null);
     }
-    public void register(CloudNode cloudNode){
+
+    public void register(CloudNode cloudNode) {
         this.connectedNodes.add(cloudNode);
     }
 
-    public void unregisterNode(String node){
+    public void unregisterNode(String node) {
         connectedNodes.removeIf(cloudNode -> cloudNode.getNodeName().equals(node));
     }
 }

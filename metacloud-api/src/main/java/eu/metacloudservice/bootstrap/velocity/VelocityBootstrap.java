@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 public class VelocityBootstrap {
 
     public static ProxyServer proxyServer;
+
     @Inject
     public VelocityBootstrap(ProxyServer proxyServer, Logger logger) {
         VelocityBootstrap.proxyServer = proxyServer;
@@ -26,12 +27,7 @@ public class VelocityBootstrap {
     }
 
     @Subscribe
-    public void onProxyInject(ProxyInitializeEvent event){
-
-    }
-
-    @Subscribe
-    public void onDisable(ProxyShutdownEvent event){
+    public void onDisable(ProxyShutdownEvent event) {
         proxyServer.getAllPlayers().forEach(player -> {
             player.disconnect(Component.text("cloudservice-shutdown"));
         });

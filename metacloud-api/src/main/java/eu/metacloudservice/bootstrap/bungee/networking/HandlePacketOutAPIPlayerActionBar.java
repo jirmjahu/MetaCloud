@@ -8,14 +8,17 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import eu.metacloudservice.networking.packet.NettyAdaptor;
 import eu.metacloudservice.networking.packet.Packet;
+
 public class HandlePacketOutAPIPlayerActionBar implements NettyAdaptor {
+
     @Override
     public void handle(Channel channel, Packet packet) {
-        if (packet instanceof PacketOutAPIPlayerActionBar){
-            if (ProxyServer.getInstance().getPlayer(((PacketOutAPIPlayerActionBar) packet).getUsername()).isConnected()){
-                ProxiedPlayer player = ProxyServer.getInstance().getPlayer(((PacketOutAPIPlayerActionBar) packet).getUsername());
-                player.sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(((PacketOutAPIPlayerActionBar) packet).getMessage()));
+        if (packet instanceof PacketOutAPIPlayerActionBar) {
+            var player = ProxyServer.getInstance().getPlayer(((PacketOutAPIPlayerActionBar) packet).getUsername());
+            if (!player.isConnected()) {
+                return;
             }
+            player.sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(((PacketOutAPIPlayerActionBar) packet).getMessage()));
         }
     }
 }

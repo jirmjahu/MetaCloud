@@ -6,12 +6,17 @@ import io.netty.channel.Channel;
 import net.kyori.adventure.text.Component;
 import eu.metacloudservice.networking.packet.NettyAdaptor;
 import eu.metacloudservice.networking.packet.Packet;
+
 public class HandlePacketOutAPIPlayerActionBar implements NettyAdaptor {
+
     @Override
     public void handle(Channel channel, Packet packet) {
-        if (packet instanceof PacketOutAPIPlayerActionBar){
-            if (VelocityBootstrap.proxyServer.getPlayer(((PacketOutAPIPlayerActionBar) packet).getUsername()).isEmpty()) return;
-            VelocityBootstrap.proxyServer.getPlayer(((PacketOutAPIPlayerActionBar) packet).getUsername()).get().sendActionBar(Component.text(((PacketOutAPIPlayerActionBar) packet).getMessage()));
+        if (packet instanceof PacketOutAPIPlayerActionBar) {
+            var player = VelocityBootstrap.proxyServer.getPlayer(((PacketOutAPIPlayerActionBar) packet).getUsername());
+            if (player.isEmpty()) {
+                return;
+            }
+            player.get().sendActionBar(Component.text(((PacketOutAPIPlayerActionBar) packet).getMessage()));
         }
     }
 }

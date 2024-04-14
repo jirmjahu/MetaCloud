@@ -10,6 +10,7 @@ import eu.metacloudservice.cloudplayer.codec.title.Title;
 import eu.metacloudservice.configuration.ConfigDriver;
 import eu.metacloudservice.networking.packet.packets.in.service.playerbased.apibased.*;
 import eu.metacloudservice.process.ServiceState;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import net.kyori.adventure.text.Component;
@@ -24,37 +25,30 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 
-public record AsyncCloudPlayer(String username, UUID uniqueId) {
+@Getter
+@AllArgsConstructor
+public class AsyncCloudPlayer {
 
-    public AsyncCloudPlayer(@NonNull String username, @NonNull UUID uniqueId) {
-        this.username = username;
-        this.uniqueId = uniqueId;
-    }
+    private final String username;
+    private final UUID uniqueId;
 
-    public UUID getUniqueId(){
-        return this.uniqueId;
-    }
-    public String getUsername(){
-        return this.username;
-    }
     public void performMore(Consumer<AsyncCloudPlayer> cloudPlayerConsumer) {
         cloudPlayerConsumer.accept(this);
     }
 
     public AsyncCloudService getProxyServer() {
-        CloudPlayerRestCache cech = (CloudPlayerRestCache) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudplayer/" + uniqueId()), CloudPlayerRestCache.class);
+        var cache = (CloudPlayerRestCache) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudplayer/" + uniqueId), CloudPlayerRestCache.class);
         try {
-            return CloudAPI.getInstance().getAsyncServicePool().getService(cech.getCloudplayerproxy()).get();
+            return CloudAPI.getInstance().getAsyncServicePool().getService(cache.getCloudplayerproxy()).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
 
     public AsyncCloudService getServer() {
-        CloudPlayerRestCache cech = (CloudPlayerRestCache) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudplayer/" + uniqueId()), CloudPlayerRestCache.class);
-
+        var cache = (CloudPlayerRestCache) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudplayer/" + uniqueId), CloudPlayerRestCache.class);
         try {
-            return CloudAPI.getInstance().getAsyncServicePool().getService(cech.getCloudplayerservice()).get();
+            return CloudAPI.getInstance().getAsyncServicePool().getService(cache.getCloudplayerservice()).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
@@ -91,31 +85,12 @@ public record AsyncCloudPlayer(String username, UUID uniqueId) {
     }
 
     public long getCurrentPlayTime() {
-        CloudPlayerRestCache cech = (CloudPlayerRestCache) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudplayer/" + uniqueId()), CloudPlayerRestCache.class);
+        CloudPlayerRestCache cech = (CloudPlayerRestCache) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudplayer/" + uniqueId), CloudPlayerRestCache.class);
         return cech.getCloudplayerconnect();
     }
 
     public void disconnect(@NonNull String message) {
         CloudAPI.getInstance().sendPacketAsynchronous(new PacketInAPIPlayerKick(username, message));
-    }
-
-    public void disconnect() {
-        disconnect("§cYour kicked form the Network");
-    }
-
-    public void playSound(@NonNull Sounds sound, int volume, int pitch) {
-        getServer().dispatchCommand("playsound " + sound.toString().toUpperCase() + " " + this.username + " " + volume + " " + pitch);
-    }
-
-    public void teleport(Teleport teleport) {
-
-        if (teleport.getPlayer() != null) {
-            getServer().dispatchCommand("tp " + this.username + " " + teleport.getPlayer());
-
-        } else {
-            getServer().dispatchCommand("tp " + this.username + " " + teleport.getPosX() + " " + teleport.getPosY() + " " + teleport.getPosZ());
-        }
-
     }
 
     public void connectRanked(String group) {
@@ -129,15 +104,6 @@ public record AsyncCloudPlayer(String username, UUID uniqueId) {
                     .ifPresent(service -> CloudAPI.getInstance().sendPacketAsynchronous(new PacketInAPIPlayerConnect(this.username, service.getName())));
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    public void changeGameMode(GameMode gameMode) {
-        switch (gameMode) {
-            case ADVENTURE -> getServer().dispatchCommand("gamemode ADVENTURE " + this.username);
-            case CREATIVE -> getServer().dispatchCommand("gamemode CREATIVE " + this.username);
-            case SURVIVAL -> getServer().dispatchCommand("gamemode SURVIVAL " + this.username);
-            case SPECTATOR -> getServer().dispatchCommand("gamemode SPECTATOR " + this.username);
         }
     }
 
@@ -177,11 +143,6 @@ public record AsyncCloudPlayer(String username, UUID uniqueId) {
         }
 
         return null;
-    }
-
-
-    public void setXp(int amount) {
-        getServer().dispatchCommand("xp " + username + " " + amount);
     }
 
     public void sendTitle(@NonNull Title title) {

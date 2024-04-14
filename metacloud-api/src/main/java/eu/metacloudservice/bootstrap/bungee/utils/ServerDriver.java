@@ -7,18 +7,15 @@ import java.util.Map;
 
 public class ServerDriver {
 
-
-    public ServerDriver() {}
-
-    public  boolean serverExists(String name) {
+    public boolean serverExists(String name) {
         return getServerInfo(name) != null;
     }
 
-    public  ServerInfo getServerInfo(String name) {
+    public ServerInfo getServerInfo(String name) {
         return getServers().get(name);
     }
 
-    public  void addServer(ServerInfo serverInfo) {
+    public void addServer(ServerInfo serverInfo) {
         if (serverExists(serverInfo.getName())) {
             return;
         }
@@ -26,16 +23,15 @@ public class ServerDriver {
         ServerConfig.addToConfig(serverInfo);
     }
 
-    public  void addLobby(ServerInfo serverInfo) {
+    public void addLobby(ServerInfo serverInfo) {
         if (serverExists(serverInfo.getName())) {
             return;
         }
-
         getServers().put(serverInfo.getName(), serverInfo);
         ServerConfig.addToConfigLobby(serverInfo);
     }
 
-    public  void removeServer(String name) {
+    public void removeServer(String name) {
         if (!serverExists(name)) {
             return;
         }
@@ -43,7 +39,8 @@ public class ServerDriver {
         getServers().remove(name);
         ServerConfig.removeFromConfig(name);
     }
-    public  void removeLobby(String name) {
+
+    public void removeLobby(String name) {
         if (!serverExists(name)) {
             return;
         }
@@ -52,7 +49,7 @@ public class ServerDriver {
         ServerConfig.remove(name);
     }
 
-    public  Map<String, ServerInfo> getServers() {
+    public Map<String, ServerInfo> getServers() {
         return ProxyServer.getInstance().getServers();
     }
 

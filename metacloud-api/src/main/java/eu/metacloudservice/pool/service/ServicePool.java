@@ -16,77 +16,75 @@ import java.util.stream.Collectors;
 
 public class ServicePool {
 
-
     private final ArrayList<CloudService> connectedServices;
 
     public ServicePool() {
         connectedServices = new ArrayList<>();
     }
 
-    public List<CloudService> getServices(){
+    public List<CloudService> getServices() {
         return connectedServices;
     }
 
-    public CloudService getService(@NonNull String name){
-        return connectedServices.stream().filter(cloudService -> cloudService.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+    public CloudService getService(@NonNull String name) {
+        return connectedServices.stream().filter(service -> service.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
 
-    public boolean serviceNotNull(@NonNull String name){
+    public boolean serviceNotNull(@NonNull String name) {
         return connectedServices.stream().anyMatch(service -> service.getName().equalsIgnoreCase(name));
     }
 
-    public List<CloudService> getServicesByGroup(@NonNull String group){
+    public List<CloudService> getServicesByGroup(@NonNull String group) {
         return connectedServices.stream().filter(cloudService -> cloudService.getGroup() == null ? false : cloudService.getGroup().getGroup().equals(group)).collect(Collectors.toList());
     }
 
-    public List<CloudService> getServicesByState(@NonNull  ServiceState state){
+    public List<CloudService> getServicesByState(@NonNull ServiceState state) {
         return connectedServices.stream().filter(cloudService -> cloudService.getState() == state).collect(Collectors.toList());
     }
-    public List<CloudService> getServicesByGroupAndState(@NonNull String group, @NonNull ServiceState state){
+
+    public List<CloudService> getServicesByGroupAndState(@NonNull String group, @NonNull ServiceState state) {
         return getServicesByGroup(group).stream().filter(cloudService -> cloudService.getState() == state).toList();
     }
-    public boolean registerService(CloudService service){
-        if (connectedServices.stream().noneMatch(service1 -> service1.getName().equals(service.getName()))){
-            connectedServices.add(service);
+
+    public boolean registerService(CloudService cloudService) {
+        if (connectedServices.stream().noneMatch(service -> cloudService.getName().equals(cloudService.getName()))) {
+            connectedServices.add(cloudService);
             return true;
-        }else {
+        } else {
             return false;
         }
     }
 
-    public boolean unregisterService(String service){
-        if (connectedServices.stream().anyMatch(service1 -> service1.getName().equals(service))){
+    public boolean unregisterService(String service) {
+        if (connectedServices.stream().anyMatch(service1 -> service1.getName().equals(service))) {
             connectedServices.removeIf(service1 -> service1.getName().equals(service));
             return true;
-        }else {
+        } else {
             return false;
         }
     }
 
-    public void launchService(String group){
+    public void launchService(String group) {
         CloudAPI.getInstance().sendPacketSynchronized(new PacketInLaunchService(group));
     }
 
-    public void launchServices(String group, int count){
-        for (int i = 0; i != count-1; i++) {
+    public void launchServices(String group, int count) {
+        for (int i = 0; i != count - 1; i++) {
             launchService(group);
         }
     }
 
-
-    public void launchService(String group, String template){
+    public void launchService(String group, String template) {
         CloudAPI.getInstance().sendPacketSynchronized(new PacketLaunchServiceWithCustomTemplate(group, template));
     }
-    public void launchServices(String group, int count, String template){
-        for (int i = 0; i != count-1; i++) {
+
+    public void launchServices(String group, int count, String template) {
+        for (int i = 0; i != count - 1; i++) {
             launchService(group, template);
         }
     }
 
-    public void stopService(String service){
+    public void stopService(String service) {
         CloudAPI.getInstance().sendPacketSynchronized(new PacketInStopService(service));
     }
-
-
-
 }
