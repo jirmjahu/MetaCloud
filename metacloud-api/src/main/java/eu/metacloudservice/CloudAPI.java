@@ -12,7 +12,6 @@ import eu.metacloudservice.configuration.dummys.message.Messages;
 import eu.metacloudservice.configuration.dummys.serviceconfig.LiveService;
 import eu.metacloudservice.events.EventDriver;
 import eu.metacloudservice.events.entrys.ICloudListener;
-import eu.metacloudservice.events.listeners.services.CloudProxyCouldNotStartEvent;
 import eu.metacloudservice.groups.dummy.Group;
 import eu.metacloudservice.networking.*;
 import eu.metacloudservice.networking.client.NettyClient;
@@ -36,7 +35,6 @@ import eu.metacloudservice.pool.offlineplayer.OfflinePlayerPool;
 import eu.metacloudservice.pool.player.PlayerPool;
 import eu.metacloudservice.pool.player.entrys.CloudPlayer;
 import eu.metacloudservice.pool.service.ServicePool;
-import eu.metacloudservice.pool.service.entrys.CloudService;
 import eu.metacloudservice.process.ServiceState;
 import eu.metacloudservice.storage.UUIDDriver;
 import eu.metacloudservice.timebaser.TimerBase;
@@ -72,7 +70,7 @@ public class CloudAPI {
     private final AsyncServicePool asyncServicePool;
     private final AsyncGroupPool asyncGroupPool;
 
-    public CloudAPI(boolean isVelo) {
+    public CloudAPI(boolean isVelocity) {
         instance = this;
         new Driver();
         service = (LiveService) new ConfigDriver("./CLOUDSERVICE.json").read(LiveService.class);
@@ -110,140 +108,210 @@ public class CloudAPI {
 
         this.eventDriver = new EventDriver();
 
-        Group group = (Group) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudgroup/" + service.getGroup()), Group.class);
-        PlayerGeneral players = (PlayerGeneral) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudplayer/genernal"), PlayerGeneral.class);
+        var group = (Group) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudgroup/" + service.getGroup()), Group.class);
+        var players = (PlayerGeneral) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudplayer/genernal"), PlayerGeneral.class);
         players.getCloudplayers().forEach(s -> {
-            if (!CloudAPI.getInstance().getPlayerPool().playerIsNotNull(s)){
+            if (!CloudAPI.getInstance().getPlayerPool().playerIsNotNull(s)) {
                 getAsyncPlayerPool().registerPlayer(new AsyncCloudPlayer(s, Objects.requireNonNull(UUIDDriver.getUUID(s))));
                 getPlayerPool().registerPlayer(new CloudPlayer(s, Objects.requireNonNull(UUIDDriver.getUUID(s))));
             }
         });
-        if (group.getGroupType().equals("PROXY")){
-            if (isVelo){
-                eventDriver.registerListener(new eu.metacloudservice.bootstrap.velocity.listener.CloudEvents());
-                NettyDriver.getInstance().getPacketDriver()
-                        .registerHandler(new PacketOutAPIPlayerConnect().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerConnect(), PacketOutAPIPlayerConnect.class)
-                        .registerHandler(new PacketOutAPIPlayerMessage().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerMessage(), PacketOutAPIPlayerMessage.class)
-                        .registerHandler(new PacketOutAPIPlayerTitle().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerTitle(), PacketOutAPIPlayerTitle.class)
-                        .registerHandler(new PacketOutAPIPlayerActionBar().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerActionBar(), PacketOutAPIPlayerActionBar.class)
-                        .registerHandler(new PacketOutAPIPlayerDispactchCommand().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerDispactchCommand(), PacketOutAPIPlayerDispactchCommand.class)
-                        .registerHandler(new PacketOutAPIPlayerKick().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerKick(), PacketOutAPIPlayerKick.class)
-                        .registerHandler(new PacketOutCloudPlayerComponent().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutCloudPlayerComponent(), PacketOutCloudPlayerComponent.class)
-                        .registerHandler(new PacketOutAPIPlayerTab().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerTab(), PacketOutAPIPlayerTab.class);
-            }else {
-                eventDriver.registerListener(new CloudEvents());
-                NettyDriver.getInstance().getPacketDriver()
-                        .registerHandler(new PacketOutAPIPlayerConnect().getPacketUUID(), new HandlePacketOutAPIPlayerConnect(), PacketOutAPIPlayerConnect.class)
-                        .registerHandler(new PacketOutAPIPlayerMessage().getPacketUUID(), new HandlePacketOutAPIPlayerMessage(), PacketOutAPIPlayerMessage.class)
-                        .registerHandler(new PacketOutAPIPlayerTitle().getPacketUUID(), new HandlePacketOutAPIPlayerTitle(), PacketOutAPIPlayerTitle.class)
-                        .registerHandler(new PacketOutAPIPlayerActionBar().getPacketUUID(), new HandlePacketOutAPIPlayerActionBar(), PacketOutAPIPlayerActionBar.class)
-                        .registerHandler(new PacketOutAPIPlayerKick().getPacketUUID(), new HandlePacketOutAPIPlayerKick(), PacketOutAPIPlayerKick.class)
-                        .registerHandler(new PacketOutCloudPlayerComponent().getPacketUUID(), new HandlePacketOutCloudPlayerComponent(), PacketOutCloudPlayerComponent.class)
-                        .registerHandler(new PacketOutAPIPlayerDispactchCommand().getPacketUUID(), new HandlePacketOutAPIPlayerDispactchCommand(), PacketOutAPIPlayerDispactchCommand.class)
-                        .registerHandler(new PacketOutAPIPlayerTab().getPacketUUID(), new HandlePacketOutAPIPlayerTab(), PacketOutAPIPlayerTab.class);
-            }
+
+        if (!group.getGroupType().equals("PROXY")) {
+            return;
         }
 
-
-
+        if (isVelocity) {
+            registerVelocityHandlers();
+        } else {
+            registerBungeeHandlers();
+        }
 
         NettyDriver.getInstance().nettyClient.sendPacketSynchronized(new PacketInServiceConnect(service.getService()));
 
         new TimerBase().schedule(new TimerTask() {
             @Override
             public void run() {
-                CloudService service = CloudAPI.getInstance().getServicePool().getService(CloudAPI.getInstance().getCurrentService().getService());
-                LiveServiceList list = (LiveServiceList) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudservice/general"), LiveServiceList.class);
-                PlayerGeneral general = (PlayerGeneral) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudplayer/genernal"), PlayerGeneral.class);
-                general.getCloudplayers().forEach(s -> {
-                    if (!CloudAPI.getInstance().getPlayerPool().playerIsNotNull(s)){
-                        getAsyncPlayerPool().registerPlayer(new AsyncCloudPlayer(s, Objects.requireNonNull(UUIDDriver.getUUID(s))));
-                        getPlayerPool().registerPlayer(new CloudPlayer(s, Objects.requireNonNull(UUIDDriver.getUUID(s))));
+                var service = CloudAPI.getInstance().getServicePool().getService(CloudAPI.getInstance().getCurrentService().getService());
+                var list = (LiveServiceList) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudservice/general"), LiveServiceList.class);
+                var general = (PlayerGeneral) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudplayer/genernal"), PlayerGeneral.class);
+                general.getCloudplayers().forEach(it -> {
+                    if (!CloudAPI.getInstance().getPlayerPool().playerIsNotNull(it)) {
+                        getAsyncPlayerPool().registerPlayer(new AsyncCloudPlayer(it, Objects.requireNonNull(UUIDDriver.getUUID(it))));
+                        getPlayerPool().registerPlayer(new CloudPlayer(it, Objects.requireNonNull(UUIDDriver.getUUID(it))));
                     }
                 });
-                getPlayerPool().getPlayers().stream().filter(cloudPlayer -> general.getCloudplayers().stream().noneMatch(s -> s.equalsIgnoreCase(cloudPlayer.getUniqueId().toString()))).toList().forEach(cloudPlayer -> {
+                playerPool.getPlayers().stream().filter(cloudPlayer -> general.getCloudplayers().stream().noneMatch(s -> s.equalsIgnoreCase(cloudPlayer.getUniqueId().toString()))).toList().forEach(cloudPlayer -> {
                     getPlayerPool().unregisterPlayer(cloudPlayer.getUniqueId());
                     getAsyncPlayerPool().unregisterPlayer(cloudPlayer.getUniqueId());
                 });
-                getServicePool().getServices().stream().filter(cloudService -> list.getCloudServices().stream().noneMatch(s -> s.equalsIgnoreCase(cloudService.getName()))).toList().forEach(cloudService -> {
+
+                servicePool.getServices().stream().filter(cloudService -> list.getCloudServices().stream().noneMatch(s -> s.equalsIgnoreCase(cloudService.getName()))).toList().forEach(cloudService -> {
                     getServicePool().unregisterService(cloudService.getName());
                     getAsyncServicePool().unregisterService(cloudService.getName());
                 });
-                if (!NettyDriver.getInstance().nettyClient.getChannel().isOpen()){
+
+                if (!NettyDriver.getInstance().nettyClient.getChannel().isOpen()) {
                     System.exit(0);
                 }
-                LiveServices liveServices = (LiveServices) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudservice/" + service.getName().replace(list.getCloudServiceSplitter(), "~")), LiveServices.class);
+
+                var liveServices = (LiveServices) new ConfigDriver().convert(restDriver.get("/cloudservice/" + service.getName().replace(list.getCloudServiceSplitter(), "~")), LiveServices.class);
                 liveServices.setLastReaction(System.currentTimeMillis());
-                CloudAPI.getInstance().getRestDriver().update("/cloudservice/" + service.getName().replace(list.getCloudServiceSplitter(), "~"), new ConfigDriver().convert(liveServices));
+                getRestDriver().update("/cloudservice/" + service.getName().replace(list.getCloudServiceSplitter(), "~"), new ConfigDriver().convert(liveServices));
 
             }
         }, 30, 30, TimeUtil.SECONDS);
-
     }
 
+    private void registerVelocityHandlers() {
+        eventDriver.registerListener(new eu.metacloudservice.bootstrap.velocity.listener.CloudEvents());
+        NettyDriver.getInstance().getPacketDriver()
+                .registerHandler(new PacketOutAPIPlayerConnect().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerConnect(), PacketOutAPIPlayerConnect.class)
+                .registerHandler(new PacketOutAPIPlayerMessage().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerMessage(), PacketOutAPIPlayerMessage.class)
+                .registerHandler(new PacketOutAPIPlayerTitle().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerTitle(), PacketOutAPIPlayerTitle.class)
+                .registerHandler(new PacketOutAPIPlayerActionBar().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerActionBar(), PacketOutAPIPlayerActionBar.class)
+                .registerHandler(new PacketOutAPIPlayerDispactchCommand().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerDispactchCommand(), PacketOutAPIPlayerDispactchCommand.class)
+                .registerHandler(new PacketOutAPIPlayerKick().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerKick(), PacketOutAPIPlayerKick.class)
+                .registerHandler(new PacketOutCloudPlayerComponent().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutCloudPlayerComponent(), PacketOutCloudPlayerComponent.class)
+                .registerHandler(new PacketOutAPIPlayerTab().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerTab(), PacketOutAPIPlayerTab.class);
+    }
 
+    private void registerBungeeHandlers() {
+        eventDriver.registerListener(new CloudEvents());
+        NettyDriver.getInstance().getPacketDriver()
+                .registerHandler(new PacketOutAPIPlayerConnect().getPacketUUID(), new HandlePacketOutAPIPlayerConnect(), PacketOutAPIPlayerConnect.class)
+                .registerHandler(new PacketOutAPIPlayerMessage().getPacketUUID(), new HandlePacketOutAPIPlayerMessage(), PacketOutAPIPlayerMessage.class)
+                .registerHandler(new PacketOutAPIPlayerTitle().getPacketUUID(), new HandlePacketOutAPIPlayerTitle(), PacketOutAPIPlayerTitle.class)
+                .registerHandler(new PacketOutAPIPlayerActionBar().getPacketUUID(), new HandlePacketOutAPIPlayerActionBar(), PacketOutAPIPlayerActionBar.class)
+                .registerHandler(new PacketOutAPIPlayerKick().getPacketUUID(), new HandlePacketOutAPIPlayerKick(), PacketOutAPIPlayerKick.class)
+                .registerHandler(new PacketOutCloudPlayerComponent().getPacketUUID(), new HandlePacketOutCloudPlayerComponent(), PacketOutCloudPlayerComponent.class)
+                .registerHandler(new PacketOutAPIPlayerDispactchCommand().getPacketUUID(), new HandlePacketOutAPIPlayerDispactchCommand(), PacketOutAPIPlayerDispactchCommand.class)
+                .registerHandler(new PacketOutAPIPlayerTab().getPacketUUID(), new HandlePacketOutAPIPlayerTab(), PacketOutAPIPlayerTab.class);
+    }
 
-    public void dispatchCommand(String command){
+    /**
+     * Sends a command for execution to a cloud service.
+     *
+     * @param command The command to execute.
+     */
+    public void dispatchCommand(String command) {
         sendPacketSynchronized(new PacketInDispatchMainCommand(command));
     }
 
-    public LiveService getCurrentService(){
+    /**
+     * Retrieves the current live service.
+     *
+     * @return The current live service.
+     */
+    public LiveService getCurrentService() {
         return service;
     }
 
-    public List<String> getWhitelist(){
-        WhiteList cech = (WhiteList) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/default/whitelist"), WhiteList.class);
-        return cech.getWhitelist();
-    }
-
-    public Messages getMessages(){
+    /**
+     * Loads the message configuration
+     *
+     * @return The loaded message configuration.
+     */
+    public Messages getMessages() {
         return (Messages) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/message/default"), Messages.class);
     }
 
-    public boolean addWhiteList(String username){
-        if (getWhitelist().stream().noneMatch(s -> s.equals(username))){
+    /**
+     * Retrieves the whitelist of the cloud.
+     *
+     * @return The whitelist of the cloud.
+     */
+    public List<String> getWhitelist() {
+        var whiteList = (WhiteList) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/default/whitelist"), WhiteList.class);
+        return whiteList.getWhitelist();
+    }
+
+    /**
+     * Adds a user to the whitelist.
+     *
+     * @param username The username to add to the whitelist.
+     */
+    public void addWhiteList(String username) {
+        if (getWhitelist().stream().noneMatch(it -> it.equals(username))) {
             CloudAPI.getInstance().sendPacketSynchronized(new PacketInCommandWhitelist(username));
-            return true;
         }
-        return false;
     }
 
-    public boolean removeWhiteList(String username){
-        if (getWhitelist().stream().anyMatch(s -> s.equals(username))){
-            if (getPlayerPool().getPlayer(username) != null) getPlayerPool().getPlayer(username).disconnect(getMessages().getMessages().get("kickNetworkIsMaintenance"));
-            CloudAPI.getInstance().sendPacketSynchronized(new PacketInCommandWhitelist(username));
-            return true;
+    /**
+     * Removes a user from the whitelist.
+     *
+     * @param username The username to remove from the whitelist.
+     */
+    public void removeWhiteList(String username) {
+        if (getWhitelist().stream().anyMatch(it -> it.equals(username))) {
+            if (this.playerPool.getPlayer(username) != null) {
+                this.playerPool.getPlayer(username).disconnect(getMessages().getMessages().get("kickNetworkIsMaintenance"));
+            }
+            sendPacketSynchronized(new PacketInCommandWhitelist(username));
         }
-        return false;
     }
 
-    public void registerListener(ICloudListener eventListener){
-        eventDriver.registerListener(eventListener);
+    /**
+     * Registers an event listener
+     *
+     * @param eventListener The event listener to register.
+     */
+    public void registerListener(ICloudListener eventListener) {
+        this.eventDriver.registerListener(eventListener);
     }
 
-    public void setState(@NonNull ServiceState state, String name){
-        CloudAPI.getInstance().sendPacketSynchronized(new PacketInChangeState(name, state.toString()));
+    /**
+     * Sets the state of a cloud service.
+     *
+     * @param state The state to set.
+     * @param name  The name of the service.
+     */
+    public void setState(@NonNull ServiceState state, String name) {
+        sendPacketSynchronized(new PacketInChangeState(name, state.toString()));
     }
 
-    public void setState(ServiceState state){
+    /**
+     * Sets the state of a cloud service.
+     *
+     * @param state The state to set.
+     */
+    public void setState(ServiceState state) {
         setState(state, getCurrentService().getService());
     }
-    
-    public double getUsedMemory(){
-        return  (double) ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed() / 1048576;
+
+    /**
+     * Retrieves the amount of used memory by the Cloud.
+     *
+     * @return The amount of used memory in megabytes.
+     */
+    public double getUsedMemory() {
+        return (double) ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed() / 1048576;
     }
 
-    public double getMaxMemory(){
-        return  (double) ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getMax() / 1048576;
+    /**
+     * Retrieves the maximum amount of memory that the Cloud can use.
+     *
+     * @return The maximum amount of memory in megabytes.
+     */
+    public double getMaxMemory() {
+        return (double) ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getMax() / 1048576;
     }
 
-    public void sendPacketSynchronized(Packet packet){
+    /**
+     * Sends a packet to the cloud service synchronously.
+     *
+     * @param packet The packet to send.
+     */
+    public void sendPacketSynchronized(Packet packet) {
         NettyDriver.getInstance().nettyClient.sendPacketSynchronized(packet);
     }
 
-    public void sendPacketAsynchronous(Packet packet){
+    /**
+     * Sends a packet to the cloud service asynchronously.
+     *
+     * @param packet The packet to send.
+     */
+    public void sendPacketAsynchronous(Packet packet) {
         NettyDriver.getInstance().nettyClient.sendPacketsAsynchronous(packet);
     }
-
-
 }
