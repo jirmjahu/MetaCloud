@@ -1,40 +1,28 @@
-/*
- * this class is by RauchigesEtwas
- */
-
 package eu.metacloudservice.api;
+
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class PluginDriver {
+
     private final List<PluginCommand> commands;
 
-    private static  PluginDriver instance;
+    @Getter
+    private static PluginDriver instance;
 
     public PluginDriver() {
         instance = this;
         commands = new ArrayList<>();
     }
 
-    public void register(PluginCommand command){
+    public void register(PluginCommand command) {
         commands.add(command);
     }
 
-    public List<PluginCommand> getCommands() {
-        return commands;
-    }
-
-    public PluginCommand getCommand(String name){
-        for (PluginCommand command : getCommands()){
-            if(command.getCommand().equalsIgnoreCase(name)){
-                return command;
-            }
-        }
-        return null;
-    }
-
-    public static PluginDriver getInstance() {
-        return instance;
+    public PluginCommand getCommand(String name) {
+        return getCommands().stream().filter(command -> command.getCommand().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
 }

@@ -39,12 +39,10 @@ public class VelocityBootstrap {
     public VelocityBootstrap(ProxyServer proxyServer, Logger logger) {
         VelocityBootstrap.proxyServer = proxyServer;
         this.logger = logger;
-
-
     }
 
     @Subscribe
-    public void handelInject(ProxyInitializeEvent event){
+    public void handle(ProxyInitializeEvent event){
         new Driver();
         new PluginDriver();
         LiveService service = (LiveService) new ConfigDriver("./CLOUDSERVICE.json").read(LiveService.class);
@@ -62,7 +60,6 @@ public class VelocityBootstrap {
         new TimerBase().schedule(new TimerTask() {
             @Override
             public void run() {
-
                 if (CloudAPI.getInstance().getGroupPool().getGroup(service.getGroup()).isMaintenance()){
                     proxyServer.getAllPlayers().forEach(player -> {
                         if ( !player.hasPermission("metacloud.connection.maintenance") && !CloudAPI.getInstance().getWhitelist().contains(player.getUsername())){

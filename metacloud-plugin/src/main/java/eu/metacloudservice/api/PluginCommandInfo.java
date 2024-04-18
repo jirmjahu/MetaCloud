@@ -14,5 +14,7 @@ import java.lang.annotation.Target;
 public @interface PluginCommandInfo {
 
     String command();
- String description();
+
+    String description();
+
 }

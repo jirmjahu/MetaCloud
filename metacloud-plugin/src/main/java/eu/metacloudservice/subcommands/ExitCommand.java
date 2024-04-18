@@ -1,7 +1,3 @@
-/*
- * this class is by RauchigesEtwas
- */
-
 package eu.metacloudservice.subcommands;
 
 import com.velocitypowered.api.proxy.Player;
@@ -15,6 +11,7 @@ import java.util.List;
 
 @PluginCommandInfo(command = "exit", description = "/cloud exit")
 public class ExitCommand extends PluginCommand {
+
     @Override
     public void performCommand(PluginCommand command, ProxiedPlayer proxiedPlayer, Player veloPlayer, org.bukkit.entity.Player bukkitPlayer, String[] args) {
         CloudAPI.getInstance().dispatchCommand("stop");

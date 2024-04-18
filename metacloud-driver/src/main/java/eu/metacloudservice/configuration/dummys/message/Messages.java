@@ -1,11 +1,12 @@
 package eu.metacloudservice.configuration.dummys.message;
 
 import eu.metacloudservice.configuration.interfaces.IConfigAdapter;
+import lombok.Getter;
 
 import java.util.HashMap;
 
+@Getter
 public class Messages implements IConfigAdapter {
-
 
     public HashMap<String, String> messages;
 
@@ -17,7 +18,4 @@ public class Messages implements IConfigAdapter {
     public Messages() {
     }
 
-    public HashMap<String, String> getMessages() {
-        return messages;
-    }
 }

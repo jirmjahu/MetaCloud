@@ -1,12 +1,4 @@
-/*
- * this class is by RauchigesEtwas
- */
-
-/*
- * this class is by RauchigesEtwas
- */
-
-package eu.metacloudservice.bukkit.command.impli;
+package eu.metacloudservice.bukkit.command.impl;
 
 import com.velocitypowered.api.proxy.Player;
 import eu.metacloudservice.CloudAPI;
@@ -19,6 +11,7 @@ import java.util.List;
 
 @PluginCommandInfo(command = "shutdown", description = "/service shutdown")
 public class ShutdownCommand extends PluginCommand {
+
     @Override
     public void performCommand(PluginCommand command, ProxiedPlayer proxiedPlayer, Player veloPlayer, org.bukkit.entity.Player bukkitPlayer, String[] args) {
         CloudAPI.getInstance().getServicePool().getService(CloudAPI.getInstance().getCurrentService().getService()).shutdown();

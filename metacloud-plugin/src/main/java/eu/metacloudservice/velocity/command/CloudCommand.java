@@ -22,7 +22,7 @@ public class CloudCommand implements SimpleCommand {
     public void execute(Invocation invocation) {
        String[] args = invocation.arguments();
         if (invocation.source() instanceof  Player player){
-            Messages messages = CloudAPI.getInstance().getMessages();
+            var messages = CloudAPI.getInstance().getMessages();
             if (player.hasPermission("metacloud.command.use")){
                 if (args.length == 0){
                     sendHelp(player);
