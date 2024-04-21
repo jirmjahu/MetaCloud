@@ -4,9 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9c64d84d-69de-4a92-8ef4-8136674adb0d" name="Changes" comment="">
+    <list default="true" id="9c64d84d-69de-4a92-8ef4-8136674adb0d" name="Changes" comment="removed discord, cloudfare module">
       <change afterPath="$PROJECT_DIR$/.idea/aws.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metacloud-modules/metamodule-notify/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/metacloud-modules/metamodule-notify/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metacloud-modules/metamodule-notify/src/main/java/eu/metacloudservice/velocity/VelocityBootstrap.java" beforeDir="false" afterPath="$PROJECT_DIR$/metacloud-modules/metamodule-notify/src/main/java/eu/metacloudservice/velocity/VelocityBootstrap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metacloud-modules/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/metacloud-modules/pom.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,9 +38,9 @@
   <component name="ProjectCodeStyleSettingsMigration">
     <option name="version" value="2" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 5
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
   <component name="ProjectId" id="2e5dnzJo8reK9UlragPTFXrEnXm" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
@@ -49,7 +53,6 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/work/metacloud-project/MetaCloud/metacloud-api/src/main/java/eu/metacloudservice/async/pool",
     "project.structure.last.edited": "Modules",
@@ -99,6 +102,15 @@
       <option name="presentableId" value="Default" />
       <updated>1711198547766</updated>
     </task>
+    <task id="LOCAL-00001" summary="removed discord, cloudfare module">
+      <option name="closed" value="true" />
+      <created>1713702921975</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1713702921975</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -111,5 +123,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="removed discord, cloudfare module" />
+    <option name="LAST_COMMIT_MESSAGE" value="removed discord, cloudfare module" />
   </component>
 </project>
