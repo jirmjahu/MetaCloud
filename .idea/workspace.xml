@@ -5,12 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9c64d84d-69de-4a92-8ef4-8136674adb0d" name="Changes" comment="removed discord, cloudfare module">
-      <change afterPath="$PROJECT_DIR$/.idea/aws.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/metacloud-modules/metamodule-notify/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/metacloud-modules/metamodule-notify/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/metacloud-modules/metamodule-notify/src/main/java/eu/metacloudservice/velocity/VelocityBootstrap.java" beforeDir="false" afterPath="$PROJECT_DIR$/metacloud-modules/metamodule-notify/src/main/java/eu/metacloudservice/velocity/VelocityBootstrap.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/metacloud-modules/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/metacloud-modules/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metacloud-modules/metamodule-hub/src/main/java/eu/metacloudservice/bungee/BungeeBootstrap.java" beforeDir="false" afterPath="$PROJECT_DIR$/metacloud-modules/metamodule-hub/src/main/java/eu/metacloudservice/bungee/BungeeBootstrap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metacloud-modules/metamodule-hub/src/main/java/eu/metacloudservice/bungee/command/HubCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/metacloud-modules/metamodule-hub/src/main/java/eu/metacloudservice/bungee/command/HubCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metacloud-modules/metamodule-hub/src/main/java/eu/metacloudservice/velocity/VelocityBootstrap.java" beforeDir="false" afterPath="$PROJECT_DIR$/metacloud-modules/metamodule-hub/src/main/java/eu/metacloudservice/velocity/VelocityBootstrap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metacloud-modules/metamodule-hub/src/main/java/eu/metacloudservice/velocity/command/HubCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/metacloud-modules/metamodule-hub/src/main/java/eu/metacloudservice/velocity/command/HubCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metacloud-modules/metamodule-notify/metamodule-notify.iml" beforeDir="false" afterPath="$PROJECT_DIR$/metacloud-modules/metamodule-notify/metamodule-notify.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metacloud-modules/metamodule-syncproxy/src/main/java/eu/metacloudservice/moduleside/MetaModule.java" beforeDir="false" afterPath="$PROJECT_DIR$/metacloud-modules/metamodule-syncproxy/src/main/java/eu/metacloudservice/moduleside/MetaModule.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,17 +51,17 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/work/metacloud-project/MetaCloud/metacloud-api/src/main/java/eu/metacloudservice/async/pool",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/work/metacloud-project/MetaCloud/metacloud-api/src/main/java/eu/metacloudservice/async/pool&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
       <recent name="eu.metacloudservice.networking" />

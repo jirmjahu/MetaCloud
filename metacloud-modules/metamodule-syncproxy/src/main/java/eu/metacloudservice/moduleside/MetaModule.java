@@ -28,8 +28,6 @@ import java.util.TimerTask;
 public class MetaModule implements IModule {
     @Override
     public void load() {
-
-
         create();
         set();
         Driver.getInstance().getMessageStorage().eventDriver.registerListener(new SyncEvents());
@@ -47,9 +45,7 @@ public class MetaModule implements IModule {
         update();
     }
 
-
     private static void create(){
-
             if (!new File("./modules/syncproxy/config.json").exists()) {
                 new File("./modules/syncproxy/icons/").mkdirs();
                 Configuration configuration = new Configuration();

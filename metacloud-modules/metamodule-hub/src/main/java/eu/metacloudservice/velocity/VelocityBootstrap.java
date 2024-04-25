@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 @Plugin(id = "metacloudhub", name = "metacloud-hub", version = "1.0.9-RELEASE", authors = "RauchigesEtwas", dependencies = {@Dependency(id = "metacloudapi"), @Dependency(id = "metacloudplugin")})
 public class VelocityBootstrap {
 
-
     public static ProxyServer proxyServer;
     private final Logger logger;
 
@@ -41,41 +40,39 @@ public class VelocityBootstrap {
         this.proxyServer = proxyServer;
         this.logger = logger;
 
-        proxyServer.getCommandManager().register("hub", new HubCommand(), "lobby", "l", "leave", "quit");
-
-
+        proxyServer.getCommandManager().register("hub", new HubCommand(), "lobby", "l");
     }
 
     @Subscribe
-    public void handelInject(ProxyInitializeEvent event){
+    public void handelInject(ProxyInitializeEvent event) {
         new Driver();
         LiveService service = (LiveService) new ConfigDriver("./CLOUDSERVICE.json").read(LiveService.class);
-
     }
-    public static CloudService getLobby(Player player){
-        if (CloudAPI.getInstance().getServicePool().getServices().stream().filter(service -> service.getGroup().getGroupType().equalsIgnoreCase("LOBBY")).collect(Collectors.toList()).isEmpty()){
+
+    public static CloudService getLobby(Player player) {
+        if (CloudAPI.getInstance().getServicePool().getServices().stream().filter(service -> service.getGroup().getGroupType().equalsIgnoreCase("LOBBY")).collect(Collectors.toList()).isEmpty()) {
             return null;
-        }else {
-            List<CloudService> cloudServices = CloudAPI.getInstance().getServicePool().getServices().stream()
-                    .filter(service -> service.getGroup().getGroupType().equalsIgnoreCase("LOBBY"))
-                    .filter(service -> !service.getGroup().isMaintenance())
-                    .filter(service -> service.getState() == ServiceState.LOBBY).collect(Collectors.toList())
-                    .stream().filter(service -> {
-                        if (service.getGroup().getPermission().equalsIgnoreCase("")){
-                            return true;
-                        }else return player.hasPermission(service.getGroup().getPermission());
-                    }).collect(Collectors.toList());
-
-
-            if (cloudServices.isEmpty()){
-                return null;
-            }
-            List<Integer> priority = new ArrayList<>();
-            cloudServices.forEach( service -> priority.add(service.getGroup().getPriority()));
-            priority.sort(Collections.reverseOrder());
-            int priorty = priority.get(0);
-            List<CloudService> lobbys = cloudServices.stream().filter(service -> service.getGroup().getPriority() == priorty).collect(Collectors.toList());
-            return  lobbys.get(new Random().nextInt(lobbys.size()));
         }
+
+        List<CloudService> cloudServices = CloudAPI.getInstance().getServicePool().getServices().stream()
+                .filter(service -> service.getGroup().getGroupType().equalsIgnoreCase("LOBBY"))
+                .filter(service -> !service.getGroup().isMaintenance())
+                .filter(service -> service.getState() == ServiceState.LOBBY).collect(Collectors.toList())
+                .stream().filter(service -> {
+                    if (service.getGroup().getPermission().equalsIgnoreCase("")) {
+                        return true;
+                    } else return player.hasPermission(service.getGroup().getPermission());
+                }).collect(Collectors.toList());
+
+
+        if (cloudServices.isEmpty()) {
+            return null;
+        }
+        List<Integer> priority = new ArrayList<>();
+        cloudServices.forEach(service -> priority.add(service.getGroup().getPriority()));
+        priority.sort(Collections.reverseOrder());
+        int priorty = priority.get(0);
+        List<CloudService> lobbys = cloudServices.stream().filter(service -> service.getGroup().getPriority() == priorty).collect(Collectors.toList());
+        return lobbys.get(new Random().nextInt(lobbys.size()));
     }
 }

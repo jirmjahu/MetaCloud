@@ -7,7 +7,6 @@
           <platformType>SPIGOT</platformType>
           <platformType>ADVENTURE</platformType>
           <platformType>BUNGEECORD</platformType>
-          <platformType>VELOCITY</platformType>
         </autoDetectTypes>
       </configuration>
     </facet>
