@@ -36,5 +36,4 @@ public class BungeeBootstrap extends Plugin {
         var service = (LiveService) new ConfigDriver("./CLOUDSERVICE.json").read(LiveService.class);
         NettyDriver.getInstance().nettyClient.sendPacketSynchronized(new PacketInServiceDisconnect(service.getService()));
     }
-
 }

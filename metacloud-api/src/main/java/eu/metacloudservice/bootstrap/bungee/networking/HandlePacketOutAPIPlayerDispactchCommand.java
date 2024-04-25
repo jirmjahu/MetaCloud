@@ -10,12 +10,13 @@ public class HandlePacketOutAPIPlayerDispactchCommand implements NettyAdaptor {
 
     @Override
     public void handle(Channel channel, Packet packet) {
-        if (packet instanceof PacketOutAPIPlayerDispactchCommand) {
-            var player = ProxyServer.getInstance().getPlayer(((PacketOutAPIPlayerDispactchCommand) packet).getUserName());
-            if (!player.isConnected()) {
-                return;
-            }
-            ProxyServer.getInstance().getPluginManager().dispatchCommand(player, ((PacketOutAPIPlayerDispactchCommand) packet).getCommand());
+        if (!(packet instanceof PacketOutAPIPlayerDispactchCommand)) {
+            return;
         }
+        var player = ProxyServer.getInstance().getPlayer(((PacketOutAPIPlayerDispactchCommand) packet).getUserName());
+        if (!player.isConnected()) {
+            return;
+        }
+        ProxyServer.getInstance().getPluginManager().dispatchCommand(player, ((PacketOutAPIPlayerDispactchCommand) packet).getCommand());
     }
 }

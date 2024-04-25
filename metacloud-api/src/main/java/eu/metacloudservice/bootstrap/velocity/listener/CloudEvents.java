@@ -1,5 +1,6 @@
 package eu.metacloudservice.bootstrap.velocity.listener;
 
+import com.velocitypowered.api.proxy.server.ServerInfo;
 import eu.metacloudservice.bootstrap.velocity.VelocityBootstrap;
 import eu.metacloudservice.events.entrys.ICloudListener;
 import eu.metacloudservice.events.entrys.Priority;
@@ -13,14 +14,14 @@ public class CloudEvents implements ICloudListener {
 
     @Subscribe(priority = Priority.HIGHEST)
     public void handle(CloudServiceConnectedEvent event) {
-        VelocityBootstrap.proxyServer.registerServer(new com.velocitypowered.api.proxy.server.ServerInfo(event.getName(), new InetSocketAddress(event.getHost(), event.getPort())));
+        VelocityBootstrap.getProxyServer().registerServer(new ServerInfo(event.getName(), new InetSocketAddress(event.getHost(), event.getPort())));
     }
 
     @Subscribe
     public void handle(CloudServiceDisconnectedEvent event) {
-        if (VelocityBootstrap.proxyServer.getServer(event.getName()).isEmpty()) {
+        if (VelocityBootstrap.getProxyServer().getServer(event.getName()).isEmpty()) {
             return;
         }
-        VelocityBootstrap.proxyServer.unregisterServer(VelocityBootstrap.proxyServer.getServer(event.getName()).get().getServerInfo());
+        VelocityBootstrap.getProxyServer().unregisterServer(VelocityBootstrap.getProxyServer().getServer(event.getName()).get().getServerInfo());
     }
 }

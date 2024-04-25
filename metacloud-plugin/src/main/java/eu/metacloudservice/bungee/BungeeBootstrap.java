@@ -8,7 +8,7 @@ import eu.metacloudservice.bungee.listener.CloudConnectListener;
 import eu.metacloudservice.configuration.ConfigDriver;
 import eu.metacloudservice.configuration.dummys.serviceconfig.LiveService;
 import eu.metacloudservice.networking.NettyDriver;
-import eu.metacloudservice.pool.service.entrys.CloudService;
+import eu.metacloudservice.service.CloudService;
 import eu.metacloudservice.process.ServiceState;
 import eu.metacloudservice.subcommands.*;
 import eu.metacloudservice.timebaser.TimerBase;

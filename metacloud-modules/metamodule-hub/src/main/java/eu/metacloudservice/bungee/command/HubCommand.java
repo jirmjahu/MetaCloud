@@ -5,7 +5,7 @@ import eu.metacloudservice.CloudAPI;
 import eu.metacloudservice.Driver;
 import eu.metacloudservice.bungee.BungeeBootstrap;
 import eu.metacloudservice.configuration.dummys.message.Messages;
-import eu.metacloudservice.pool.service.entrys.CloudService;
+import eu.metacloudservice.service.CloudService;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;

@@ -1,10 +1,10 @@
 package eu.metacloudservice;
 
-import eu.metacloudservice.async.pool.group.AsyncGroupPool;
-import eu.metacloudservice.async.pool.offlineplayer.AsyncOfflinePlayerPool;
-import eu.metacloudservice.async.pool.player.AsyncPlayerPool;
-import eu.metacloudservice.async.pool.player.entrys.AsyncCloudPlayer;
-import eu.metacloudservice.async.pool.service.AsyncServicePool;
+import eu.metacloudservice.group.async.AsyncGroupPool;
+import eu.metacloudservice.offlineplayer.async.AsyncOfflinePlayerPool;
+import eu.metacloudservice.player.async.AsyncPlayerPool;
+import eu.metacloudservice.player.async.AsyncCloudPlayer;
+import eu.metacloudservice.service.async.AsyncServicePool;
 import eu.metacloudservice.bootstrap.bungee.listener.CloudEvents;
 import eu.metacloudservice.bootstrap.bungee.networking.*;
 import eu.metacloudservice.configuration.ConfigDriver;
@@ -30,11 +30,11 @@ import eu.metacloudservice.networking.packet.packets.out.service.playerbased.Pac
 import eu.metacloudservice.networking.packet.packets.out.service.playerbased.PacketOutPlayerDisconnect;
 import eu.metacloudservice.networking.packet.packets.out.service.playerbased.PacketOutPlayerSwitchService;
 import eu.metacloudservice.networking.packet.packets.out.service.playerbased.apibased.*;
-import eu.metacloudservice.pool.group.GroupPool;
-import eu.metacloudservice.pool.offlineplayer.OfflinePlayerPool;
-import eu.metacloudservice.pool.player.PlayerPool;
-import eu.metacloudservice.pool.player.entrys.CloudPlayer;
-import eu.metacloudservice.pool.service.ServicePool;
+import eu.metacloudservice.group.GroupPool;
+import eu.metacloudservice.offlineplayer.OfflinePlayerPool;
+import eu.metacloudservice.player.PlayerPool;
+import eu.metacloudservice.player.CloudPlayer;
+import eu.metacloudservice.service.ServicePool;
 import eu.metacloudservice.process.ServiceState;
 import eu.metacloudservice.storage.UUIDDriver;
 import eu.metacloudservice.timebaser.TimerBase;
@@ -58,13 +58,16 @@ public class CloudAPI {
     @Getter
     private static CloudAPI instance;
     private final LiveService service;
-    private final PlayerPool playerPool;
+
     private final OfflinePlayerPool offlinePlayerPool;
     private final AsyncOfflinePlayerPool asyncOfflinePlayerPool;
-    private final GroupPool groupPool;
-    private final ServicePool servicePool;
+
     private final RestDriver restDriver;
     private final EventDriver eventDriver;
+
+    private final PlayerPool playerPool;
+    private final ServicePool servicePool;
+    private final GroupPool groupPool;
 
     private final AsyncPlayerPool asyncPlayerPool;
     private final AsyncServicePool asyncServicePool;
@@ -88,43 +91,25 @@ public class CloudAPI {
         NettyDriver.getInstance().nettyClient = new NettyClient();
         NettyDriver.getInstance().nettyClient.bind(service.getManagerAddress(), service.getNetworkPort()).connect();
 
-        NettyDriver.getInstance().getPacketDriver()
-                .registerHandler(new PacketOutCloudServiceCouldNotStartEvent().getPacketUUID(), new HandlePacketOutCloudServiceCouldNotStartEvent(), PacketOutCloudServiceCouldNotStartEvent.class)
-                .registerHandler(new PacketOutCloudProxyCouldNotStartEvent().getPacketUUID(), new HandlePacketOutCloudProxyCouldNotStartEvent(), PacketOutCloudProxyCouldNotStartEvent.class)
-                .registerHandler(new PacketOutServicePrepared().getPacketUUID(), new HandlePacketOutServicePrepared(), PacketOutServicePrepared.class)
-                .registerHandler(new PacketOutServiceConnected().getPacketUUID(), new HandlePacketOutServiceConnected(), PacketOutServiceConnected.class)
-                .registerHandler(new PacketOutServiceDisconnected().getPacketUUID(), new HandlePacketOutServiceDisconnected(), PacketOutServiceDisconnected.class)
-                .registerHandler(new PacketOutPlayerConnect().getPacketUUID(), new HandlePacketOutPlayerConnect(), PacketOutPlayerConnect.class)
-                .registerHandler(new PacketOutPlayerDisconnect().getPacketUUID(), new HandlePacketOutPlayerDisconnect(), PacketOutPlayerDisconnect.class)
-                .registerHandler(new PacketOutPlayerSwitchService().getPacketUUID(), new HandlePacketOutPlayerSwitchService(), PacketOutPlayerSwitchService.class)
-                .registerHandler(new PacketOutServiceLaunch().getPacketUUID(), new HandlePacketOutServiceLaunch(), PacketOutServiceLaunch.class)
-                .registerHandler(new PacketOutGroupCreate().getPacketUUID(), new HandlePacketOutGroupCreate(), PacketOutGroupCreate.class)
-                .registerHandler(new PacketOutGroupDelete().getPacketUUID(), new HandlePacketOutGroupDelete(), PacketOutGroupDelete.class)
-                .registerHandler(new PacketOutGroupEdit().getPacketUUID(), new HandlePacketOutGroupEdit(), PacketOutGroupEdit.class)
-                .registerHandler(new PacketOutResAPItReload().getPacketUUID(), new HandlePacketOutResAPItReload(), PacketOutResAPItReload.class)
-                .registerHandler(new PacketOutCloudServiceChangeState().getPacketUUID(), new HandlePacketOutCloudServiceChangeState(), PacketOutCloudServiceChangeState.class)
-                .registerHandler(new PacketOutCloudProxyChangeState().getPacketUUID(), new HandlePacketOutCloudProxyChangeState(), PacketOutCloudProxyChangeState.class)
-                .registerHandler(new PacketOutRestAPIPut().getPacketUUID(), new HandlePacketOutRestAPIPut(), PacketOutRestAPIPut.class);
+        this.registerHandlers();
 
         this.eventDriver = new EventDriver();
 
         var group = (Group) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudgroup/" + service.getGroup()), Group.class);
         var players = (PlayerGeneral) new ConfigDriver().convert(CloudAPI.getInstance().getRestDriver().get("/cloudplayer/genernal"), PlayerGeneral.class);
-        players.getCloudplayers().forEach(s -> {
-            if (!CloudAPI.getInstance().getPlayerPool().playerIsNotNull(s)) {
-                getAsyncPlayerPool().registerPlayer(new AsyncCloudPlayer(s, Objects.requireNonNull(UUIDDriver.getUUID(s))));
-                getPlayerPool().registerPlayer(new CloudPlayer(s, Objects.requireNonNull(UUIDDriver.getUUID(s))));
+        players.getCloudplayers().forEach(it -> {
+            if (!CloudAPI.getInstance().getPlayerPool().playerIsNotNull(it)) {
+                getAsyncPlayerPool().registerPlayer(new AsyncCloudPlayer(it, Objects.requireNonNull(UUIDDriver.getUUID(it))));
+                getPlayerPool().registerPlayer(new CloudPlayer(it, Objects.requireNonNull(UUIDDriver.getUUID(it))));
             }
         });
 
-        if (!group.getGroupType().equals("PROXY")) {
-            return;
-        }
-
-        if (isVelocity) {
-            registerVelocityHandlers();
-        } else {
-            registerBungeeHandlers();
+        if (group.getGroupType().equals("PROXY")) {
+            if (isVelocity) {
+                this.registerVelocityHandlers();
+            } else {
+                this.registerBungeeHandlers();
+            }
         }
 
         NettyDriver.getInstance().nettyClient.sendPacketSynchronized(new PacketInServiceConnect(service.getService()));
@@ -146,7 +131,7 @@ public class CloudAPI {
                     getAsyncPlayerPool().unregisterPlayer(cloudPlayer.getUniqueId());
                 });
 
-                servicePool.getServices().stream().filter(cloudService -> list.getCloudServices().stream().noneMatch(s -> s.equalsIgnoreCase(cloudService.getName()))).toList().forEach(cloudService -> {
+                servicePool.getServices().stream().filter(cloudService -> list.getCloudServices().stream().noneMatch(it -> it.equalsIgnoreCase(cloudService.getName()))).toList().forEach(cloudService -> {
                     getServicePool().unregisterService(cloudService.getName());
                     getAsyncServicePool().unregisterService(cloudService.getName());
                 });
@@ -161,32 +146,6 @@ public class CloudAPI {
 
             }
         }, 30, 30, TimeUtil.SECONDS);
-    }
-
-    private void registerVelocityHandlers() {
-        eventDriver.registerListener(new eu.metacloudservice.bootstrap.velocity.listener.CloudEvents());
-        NettyDriver.getInstance().getPacketDriver()
-                .registerHandler(new PacketOutAPIPlayerConnect().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerConnect(), PacketOutAPIPlayerConnect.class)
-                .registerHandler(new PacketOutAPIPlayerMessage().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerMessage(), PacketOutAPIPlayerMessage.class)
-                .registerHandler(new PacketOutAPIPlayerTitle().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerTitle(), PacketOutAPIPlayerTitle.class)
-                .registerHandler(new PacketOutAPIPlayerActionBar().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerActionBar(), PacketOutAPIPlayerActionBar.class)
-                .registerHandler(new PacketOutAPIPlayerDispactchCommand().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerDispactchCommand(), PacketOutAPIPlayerDispactchCommand.class)
-                .registerHandler(new PacketOutAPIPlayerKick().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerKick(), PacketOutAPIPlayerKick.class)
-                .registerHandler(new PacketOutCloudPlayerComponent().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutCloudPlayerComponent(), PacketOutCloudPlayerComponent.class)
-                .registerHandler(new PacketOutAPIPlayerTab().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerTab(), PacketOutAPIPlayerTab.class);
-    }
-
-    private void registerBungeeHandlers() {
-        eventDriver.registerListener(new CloudEvents());
-        NettyDriver.getInstance().getPacketDriver()
-                .registerHandler(new PacketOutAPIPlayerConnect().getPacketUUID(), new HandlePacketOutAPIPlayerConnect(), PacketOutAPIPlayerConnect.class)
-                .registerHandler(new PacketOutAPIPlayerMessage().getPacketUUID(), new HandlePacketOutAPIPlayerMessage(), PacketOutAPIPlayerMessage.class)
-                .registerHandler(new PacketOutAPIPlayerTitle().getPacketUUID(), new HandlePacketOutAPIPlayerTitle(), PacketOutAPIPlayerTitle.class)
-                .registerHandler(new PacketOutAPIPlayerActionBar().getPacketUUID(), new HandlePacketOutAPIPlayerActionBar(), PacketOutAPIPlayerActionBar.class)
-                .registerHandler(new PacketOutAPIPlayerKick().getPacketUUID(), new HandlePacketOutAPIPlayerKick(), PacketOutAPIPlayerKick.class)
-                .registerHandler(new PacketOutCloudPlayerComponent().getPacketUUID(), new HandlePacketOutCloudPlayerComponent(), PacketOutCloudPlayerComponent.class)
-                .registerHandler(new PacketOutAPIPlayerDispactchCommand().getPacketUUID(), new HandlePacketOutAPIPlayerDispactchCommand(), PacketOutAPIPlayerDispactchCommand.class)
-                .registerHandler(new PacketOutAPIPlayerTab().getPacketUUID(), new HandlePacketOutAPIPlayerTab(), PacketOutAPIPlayerTab.class);
     }
 
     /**
@@ -313,5 +272,51 @@ public class CloudAPI {
      */
     public void sendPacketAsynchronous(Packet packet) {
         NettyDriver.getInstance().nettyClient.sendPacketsAsynchronous(packet);
+    }
+
+    private void registerHandlers() {
+        NettyDriver.getInstance().getPacketDriver()
+                .registerHandler(new PacketOutCloudServiceCouldNotStartEvent().getPacketUUID(), new HandlePacketOutCloudServiceCouldNotStartEvent(), PacketOutCloudServiceCouldNotStartEvent.class)
+                .registerHandler(new PacketOutCloudProxyCouldNotStartEvent().getPacketUUID(), new HandlePacketOutCloudProxyCouldNotStartEvent(), PacketOutCloudProxyCouldNotStartEvent.class)
+                .registerHandler(new PacketOutServicePrepared().getPacketUUID(), new HandlePacketOutServicePrepared(), PacketOutServicePrepared.class)
+                .registerHandler(new PacketOutServiceConnected().getPacketUUID(), new HandlePacketOutServiceConnected(), PacketOutServiceConnected.class)
+                .registerHandler(new PacketOutServiceDisconnected().getPacketUUID(), new HandlePacketOutServiceDisconnected(), PacketOutServiceDisconnected.class)
+                .registerHandler(new PacketOutPlayerConnect().getPacketUUID(), new HandlePacketOutPlayerConnect(), PacketOutPlayerConnect.class)
+                .registerHandler(new PacketOutPlayerDisconnect().getPacketUUID(), new HandlePacketOutPlayerDisconnect(), PacketOutPlayerDisconnect.class)
+                .registerHandler(new PacketOutPlayerSwitchService().getPacketUUID(), new HandlePacketOutPlayerSwitchService(), PacketOutPlayerSwitchService.class)
+                .registerHandler(new PacketOutServiceLaunch().getPacketUUID(), new HandlePacketOutServiceLaunch(), PacketOutServiceLaunch.class)
+                .registerHandler(new PacketOutGroupCreate().getPacketUUID(), new HandlePacketOutGroupCreate(), PacketOutGroupCreate.class)
+                .registerHandler(new PacketOutGroupDelete().getPacketUUID(), new HandlePacketOutGroupDelete(), PacketOutGroupDelete.class)
+                .registerHandler(new PacketOutGroupEdit().getPacketUUID(), new HandlePacketOutGroupEdit(), PacketOutGroupEdit.class)
+                .registerHandler(new PacketOutResAPItReload().getPacketUUID(), new HandlePacketOutResAPItReload(), PacketOutResAPItReload.class)
+                .registerHandler(new PacketOutCloudServiceChangeState().getPacketUUID(), new HandlePacketOutCloudServiceChangeState(), PacketOutCloudServiceChangeState.class)
+                .registerHandler(new PacketOutCloudProxyChangeState().getPacketUUID(), new HandlePacketOutCloudProxyChangeState(), PacketOutCloudProxyChangeState.class)
+                .registerHandler(new PacketOutRestAPIPut().getPacketUUID(), new HandlePacketOutRestAPIPut(), PacketOutRestAPIPut.class);
+    }
+
+    private void registerVelocityHandlers() {
+        eventDriver.registerListener(new eu.metacloudservice.bootstrap.velocity.listener.CloudEvents());
+        NettyDriver.getInstance().getPacketDriver()
+                .registerHandler(new PacketOutAPIPlayerConnect().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerConnect(), PacketOutAPIPlayerConnect.class)
+                .registerHandler(new PacketOutAPIPlayerMessage().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerMessage(), PacketOutAPIPlayerMessage.class)
+                .registerHandler(new PacketOutAPIPlayerTitle().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerTitle(), PacketOutAPIPlayerTitle.class)
+                .registerHandler(new PacketOutAPIPlayerActionBar().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerActionBar(), PacketOutAPIPlayerActionBar.class)
+                .registerHandler(new PacketOutAPIPlayerDispactchCommand().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerDispactchCommand(), PacketOutAPIPlayerDispactchCommand.class)
+                .registerHandler(new PacketOutAPIPlayerKick().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerKick(), PacketOutAPIPlayerKick.class)
+                .registerHandler(new PacketOutCloudPlayerComponent().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutCloudPlayerComponent(), PacketOutCloudPlayerComponent.class)
+                .registerHandler(new PacketOutAPIPlayerTab().getPacketUUID(), new eu.metacloudservice.bootstrap.velocity.networking.HandlePacketOutAPIPlayerTab(), PacketOutAPIPlayerTab.class);
+    }
+
+    private void registerBungeeHandlers() {
+        eventDriver.registerListener(new CloudEvents());
+        NettyDriver.getInstance().getPacketDriver()
+                .registerHandler(new PacketOutAPIPlayerConnect().getPacketUUID(), new HandlePacketOutAPIPlayerConnect(), PacketOutAPIPlayerConnect.class)
+                .registerHandler(new PacketOutAPIPlayerMessage().getPacketUUID(), new HandlePacketOutAPIPlayerMessage(), PacketOutAPIPlayerMessage.class)
+                .registerHandler(new PacketOutAPIPlayerTitle().getPacketUUID(), new HandlePacketOutAPIPlayerTitle(), PacketOutAPIPlayerTitle.class)
+                .registerHandler(new PacketOutAPIPlayerActionBar().getPacketUUID(), new HandlePacketOutAPIPlayerActionBar(), PacketOutAPIPlayerActionBar.class)
+                .registerHandler(new PacketOutAPIPlayerKick().getPacketUUID(), new HandlePacketOutAPIPlayerKick(), PacketOutAPIPlayerKick.class)
+                .registerHandler(new PacketOutCloudPlayerComponent().getPacketUUID(), new HandlePacketOutCloudPlayerComponent(), PacketOutCloudPlayerComponent.class)
+                .registerHandler(new PacketOutAPIPlayerDispactchCommand().getPacketUUID(), new HandlePacketOutAPIPlayerDispactchCommand(), PacketOutAPIPlayerDispactchCommand.class)
+                .registerHandler(new PacketOutAPIPlayerTab().getPacketUUID(), new HandlePacketOutAPIPlayerTab(), PacketOutAPIPlayerTab.class);
     }
 }
