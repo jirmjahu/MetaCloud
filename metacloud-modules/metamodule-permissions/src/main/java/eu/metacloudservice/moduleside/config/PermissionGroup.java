@@ -27,8 +27,4 @@ public class PermissionGroup {
     private String scoreboard;
     private ArrayList<PermissionAble> permissions;
     private ArrayList<IncludedAble> included;
-
-
-    public PermissionGroup(){}
-
 }

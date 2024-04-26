@@ -13,30 +13,28 @@ import eu.metacloudservice.events.listeners.player.CloudPlayerConnectedEvent;
 import eu.metacloudservice.events.listeners.player.CloudPlayerSwitchEvent;
 import eu.metacloudservice.events.listeners.restapi.CloudRestAPIPutEvent;
 import eu.metacloudservice.moduleside.config.*;
-import eu.metacloudservice.pool.player.entrys.CloudPlayer;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class CloudEvents implements ICloudListener {
 
 
-    @Subscribe(priority =  Priority.HIGHEST)
-    public void handle(CloudRestAPIPutEvent event){
-        if (event.getPath().equalsIgnoreCase("/module/permission/configuration")){
+    @Subscribe(priority = Priority.HIGHEST)
+    public void handle(CloudRestAPIPutEvent event) {
+        if (event.getPath().equalsIgnoreCase("/module/permission/configuration")) {
             new ConfigDriver("./modules/permissions/config.json").save(new ConfigDriver().convert(event.getContent(), Configuration.class));
         }
     }
 
     @Subscribe(priority = Priority.HIGHEST)
-    public void handelConnect(CloudPlayerConnectedEvent event){
+    public void handelConnect(CloudPlayerConnectedEvent event) {
 
         Configuration config = (Configuration) new ConfigDriver("./modules/permissions/config.json").read(Configuration.class);
 
-        if (config.getPlayers().stream().noneMatch(permissionPlayer -> permissionPlayer.getUuid().equalsIgnoreCase(event.getUniqueId()))){
+        if (config.getPlayers().stream().noneMatch(permissionPlayer -> permissionPlayer.getUuid().equals(event.getUniqueId()))) {
 
 
             ArrayList<IncludedAble> ables = new ArrayList<>();
@@ -52,9 +50,9 @@ public class CloudEvents implements ICloudListener {
         config.getGroups().forEach(permissionGroup -> {
 
             ArrayList<IncludedAble> includedAbles = (ArrayList<IncludedAble>) permissionGroup.getIncluded().stream().filter(includedAble -> {
-                if (includedAble.getTime().equalsIgnoreCase("LIFETIME")){
+                if (includedAble.getTime().equalsIgnoreCase("LIFETIME")) {
                     return true;
-                }else {
+                } else {
                     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"); // das Format des Datums und der Uhrzeit, z.B. '01.02.2022 20:00'
                     LocalDateTime currentDateTime = LocalDateTime.now(); // das aktuelle Datum und die aktuelle Uhrzeit
                     LocalDateTime dateTimeA = LocalDateTime.parse(includedAble.getTime(), dateTimeFormatter); // konvertiere das Datum und die Uhrzeit A in ein LocalDateTime-Objekt
@@ -62,9 +60,9 @@ public class CloudEvents implements ICloudListener {
                 }
             }).toList();
             ArrayList<PermissionAble> permissionAbles = (ArrayList<PermissionAble>) permissionGroup.getPermissions().stream().filter(permissionAble -> {
-                if (permissionAble.getTime().equalsIgnoreCase("LIFETIME")){
+                if (permissionAble.getTime().equalsIgnoreCase("LIFETIME")) {
                     return true;
-                }else {
+                } else {
                     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"); // das Format des Datums und der Uhrzeit, z.B. '01.02.2022 20:00'
                     LocalDateTime currentDateTime = LocalDateTime.now(); // das aktuelle Datum und die aktuelle Uhrzeit
                     LocalDateTime dateTimeA = LocalDateTime.parse(permissionAble.getTime(), dateTimeFormatter); // konvertiere das Datum und die Uhrzeit A in ein LocalDateTime-Objekt
@@ -72,7 +70,7 @@ public class CloudEvents implements ICloudListener {
                 }
             }).toList();
 
-            updateGroup.add( new PermissionGroup(permissionGroup.getGroup(), permissionGroup.getIsDefault(), permissionGroup.getTagPower(), permissionGroup.getPrefix(), permissionGroup.getSuffix(), permissionAbles, includedAbles));
+            updateGroup.add(new PermissionGroup(permissionGroup.getGroup(), permissionGroup.getIsDefault(), permissionGroup.getTagPower(), permissionGroup.getPrefix(), permissionGroup.getSuffix(),permissionGroup.getDisplay(), permissionGroup.getScoreboard(), permissionAbles, includedAbles));
         });
 
         config.getGroups().clear();
@@ -86,15 +84,15 @@ public class CloudEvents implements ICloudListener {
     }
 
     @Subscribe(priority = Priority.HIGHEST)
-    public void handelConnect(CloudPlayerSwitchEvent event){
+    public void handelConnect(CloudPlayerSwitchEvent event) {
         Configuration config = (Configuration) new ConfigDriver("./modules/permissions/config.json").read(Configuration.class);
-        if (config.getPlayers().stream().anyMatch(permissionPlayer -> permissionPlayer.getUuid().equalsIgnoreCase(event.getUniqueId()))){
-            PermissionPlayer player = config.getPlayers().stream().filter(permissionPlayer -> permissionPlayer.getUuid().equalsIgnoreCase(event.getUniqueId())).findFirst().orElse(null);
+        if (config.getPlayers().stream().anyMatch(permissionPlayer -> permissionPlayer.getUuid().equals(event.getUniqueId()))) {
+            PermissionPlayer player = config.getPlayers().stream().filter(permissionPlayer -> permissionPlayer.getUuid().equals(event.getUniqueId())).findFirst().orElse(null);
             if (player == null) return;
             ArrayList<IncludedAble> newGroup = (ArrayList<IncludedAble>) player.getGroups().stream().filter(includedAble -> {
-                if (includedAble.getTime().equalsIgnoreCase("LIFETIME")){
+                if (includedAble.getTime().equalsIgnoreCase("LIFETIME")) {
                     return true;
-                }else {
+                } else {
                     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"); // das Format des Datums und der Uhrzeit, z.B. '01.02.2022 20:00'
                     LocalDateTime currentDateTime = LocalDateTime.now(); // das aktuelle Datum und die aktuelle Uhrzeit
                     LocalDateTime dateTimeA = LocalDateTime.parse(includedAble.getTime(), dateTimeFormatter); // konvertiere das Datum und die Uhrzeit A in ein LocalDateTime-Objekt
@@ -103,9 +101,9 @@ public class CloudEvents implements ICloudListener {
             }).toList();
 
             ArrayList<PermissionAble> newAble = (ArrayList<PermissionAble>) player.getPermissions().stream().filter(permissionAble -> {
-                if (permissionAble.getTime().equalsIgnoreCase("LIFETIME")){
+                if (permissionAble.getTime().equalsIgnoreCase("LIFETIME")) {
                     return true;
-                }else {
+                } else {
                     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"); // das Format des Datums und der Uhrzeit, z.B. '01.02.2022 20:00'
                     LocalDateTime currentDateTime = LocalDateTime.now(); // das aktuelle Datum und die aktuelle Uhrzeit
                     LocalDateTime dateTimeA = LocalDateTime.parse(permissionAble.getTime(), dateTimeFormatter); // konvertiere das Datum und die Uhrzeit A in ein LocalDateTime-Objekt
@@ -113,11 +111,11 @@ public class CloudEvents implements ICloudListener {
                 }
             }).toList();
 
-            if (newGroup.isEmpty()){
+            if (newGroup.isEmpty()) {
                 config.getGroups().stream().filter(PermissionGroup::getIsDefault).toList().forEach(permissionGroup -> newGroup.add(new IncludedAble(permissionGroup.getGroup(), "LIFETIME")));
             }
 
-            config.getPlayers().removeIf(permissionPlayer -> permissionPlayer.getUuid().equalsIgnoreCase(event.getUniqueId()));
+            config.getPlayers().removeIf(permissionPlayer -> permissionPlayer.getUuid().equals(event.getUniqueId()));
             config.getPlayers().add(new PermissionPlayer(event.getUniqueId(), newGroup, newAble));
             new ConfigDriver("./modules/permissions/config.json").save(config);
             Driver.getInstance().getWebServer().updateRoute("/module/permission/configuration", new ConfigDriver().convert(new ConfigDriver("./modules/permissions/config.json").read(Configuration.class)));
@@ -129,9 +127,9 @@ public class CloudEvents implements ICloudListener {
         config.getGroups().forEach(permissionGroup -> {
 
             ArrayList<IncludedAble> includedAbles = (ArrayList<IncludedAble>) permissionGroup.getIncluded().stream().filter(includedAble -> {
-                if (includedAble.getTime().equalsIgnoreCase("LIFETIME")){
+                if (includedAble.getTime().equalsIgnoreCase("LIFETIME")) {
                     return true;
-                }else {
+                } else {
                     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"); // das Format des Datums und der Uhrzeit, z.B. '01.02.2022 20:00'
                     LocalDateTime currentDateTime = LocalDateTime.now(); // das aktuelle Datum und die aktuelle Uhrzeit
                     LocalDateTime dateTimeA = LocalDateTime.parse(includedAble.getTime(), dateTimeFormatter); // konvertiere das Datum und die Uhrzeit A in ein LocalDateTime-Objekt
@@ -139,9 +137,9 @@ public class CloudEvents implements ICloudListener {
                 }
             }).toList();
             ArrayList<PermissionAble> permissionAbles = (ArrayList<PermissionAble>) permissionGroup.getPermissions().stream().filter(permissionAble -> {
-                if (permissionAble.getTime().equalsIgnoreCase("LIFETIME")){
+                if (permissionAble.getTime().equalsIgnoreCase("LIFETIME")) {
                     return true;
-                }else {
+                } else {
                     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"); // das Format des Datums und der Uhrzeit, z.B. '01.02.2022 20:00'
                     LocalDateTime currentDateTime = LocalDateTime.now(); // das aktuelle Datum und die aktuelle Uhrzeit
                     LocalDateTime dateTimeA = LocalDateTime.parse(permissionAble.getTime(), dateTimeFormatter); // konvertiere das Datum und die Uhrzeit A in ein LocalDateTime-Objekt
@@ -149,7 +147,7 @@ public class CloudEvents implements ICloudListener {
                 }
             }).toList();
 
-            updateGroup.add( new PermissionGroup(permissionGroup.getGroup(), permissionGroup.getIsDefault(), permissionGroup.getTagPower(), permissionGroup.getPrefix(), permissionGroup.getSuffix(), permissionAbles, includedAbles));
+            updateGroup.add(new PermissionGroup(permissionGroup.getGroup(), permissionGroup.getIsDefault(), permissionGroup.getTagPower(), permissionGroup.getPrefix(), permissionGroup.getSuffix(), permissionGroup.getDisplay(), permissionGroup.getScoreboard(), permissionAbles, includedAbles));
         });
 
         config.getGroups().clear();

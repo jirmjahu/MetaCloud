@@ -3,9 +3,8 @@ package eu.metacloudservice.velocity.command;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
 import eu.metacloudservice.CloudAPI;
-import eu.metacloudservice.Driver;
 import eu.metacloudservice.configuration.dummys.message.Messages;
-import eu.metacloudservice.pool.service.entrys.CloudService;
+import eu.metacloudservice.service.CloudService;
 import eu.metacloudservice.velocity.VelocityBootstrap;
 import net.kyori.adventure.text.Component;
 
