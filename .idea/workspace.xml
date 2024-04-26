@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9c64d84d-69de-4a92-8ef4-8136674adb0d" name="Changes" comment="removed discord, cloudfare module">
+    <list default="true" id="9c64d84d-69de-4a92-8ef4-8136674adb0d" name="Changes" comment="Cleanup Hub Module, remove Command Aliases.">
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metacloud-modules/metamodule-hub/src/main/java/eu/metacloudservice/bungee/BungeeBootstrap.java" beforeDir="false" afterPath="$PROJECT_DIR$/metacloud-modules/metamodule-hub/src/main/java/eu/metacloudservice/bungee/BungeeBootstrap.java" afterDir="false" />
@@ -112,7 +112,15 @@
       <option name="project" value="LOCAL" />
       <updated>1713702921975</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Cleanup Hub Module, remove Command Aliases.">
+      <option name="closed" value="true" />
+      <created>1714076662676</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1714076662676</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -128,6 +136,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="removed discord, cloudfare module" />
-    <option name="LAST_COMMIT_MESSAGE" value="removed discord, cloudfare module" />
+    <MESSAGE value="Cleanup Hub Module, remove Command Aliases." />
+    <option name="LAST_COMMIT_MESSAGE" value="Cleanup Hub Module, remove Command Aliases." />
   </component>
 </project>
