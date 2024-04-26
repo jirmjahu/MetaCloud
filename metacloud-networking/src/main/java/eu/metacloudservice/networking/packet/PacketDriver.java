@@ -13,7 +13,9 @@ public class PacketDriver {
     private final Map<Integer, NettyAdaptor> adaptor = new ConcurrentHashMap<>();
 
     @SneakyThrows
-    public PacketDriver() {}
+    public PacketDriver() {
+
+    }
 
     public void call(@NotNull Integer id, @NotNull Channel channel, @NotNull Packet packet) {
         NettyAdaptor nettyAdaptor = adaptor.get(id);

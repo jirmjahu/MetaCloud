@@ -16,7 +16,7 @@ import eu.metacloudservice.groups.dummy.Group;
 import eu.metacloudservice.networking.packet.packets.in.service.playerbased.PacketInPlayerConnect;
 import eu.metacloudservice.networking.packet.packets.in.service.playerbased.PacketInPlayerDisconnect;
 import eu.metacloudservice.networking.packet.packets.in.service.playerbased.PacketInPlayerSwitchService;
-import eu.metacloudservice.pool.service.entrys.CloudService;
+import eu.metacloudservice.service.CloudService;
 import eu.metacloudservice.velocity.VelocityBootstrap;
 import net.kyori.adventure.text.Component;
 
@@ -36,28 +36,27 @@ public class CloudConnectListener {
 
 
     @Subscribe(order = PostOrder.FIRST)
-    public void handel(ServerPreConnectEvent event){
-        if (event.getOriginalServer().getServerInfo().getName().equalsIgnoreCase("lobby")){
+    public void handel(ServerPreConnectEvent event) {
+        if (event.getOriginalServer().getServerInfo().getName().equalsIgnoreCase("lobby")) {
             target = server.getServer(VelocityBootstrap.getLobby(event.getPlayer()).getName()).get().getServerInfo();
-            if (target != null){
+            if (target != null) {
                 event.setResult(ServerPreConnectEvent.ServerResult.allowed(server.getServer(target.getName()).get()));
-            }else event.setResult(ServerPreConnectEvent.ServerResult.denied());
-        }else if (event.getOriginalServer() == null){
+            } else event.setResult(ServerPreConnectEvent.ServerResult.denied());
+        } else if (event.getOriginalServer() == null) {
             target = server.getServer(VelocityBootstrap.getLobby(event.getPlayer()).getName()).get().getServerInfo();
-            if (target != null){
+            if (target != null) {
                 event.setResult(ServerPreConnectEvent.ServerResult.allowed(server.getServer(target.getName()).get()));
-            }else event.setResult(ServerPreConnectEvent.ServerResult.denied());
+            } else event.setResult(ServerPreConnectEvent.ServerResult.denied());
         }
     }
 
 
-
     @Subscribe
-    public void handle(PostLoginEvent event){
-        LiveService service = (LiveService)(new ConfigDriver("./CLOUDSERVICE.json")).read(LiveService.class);
+    public void handle(PostLoginEvent event) {
+        LiveService service = (LiveService) (new ConfigDriver("./CLOUDSERVICE.json")).read(LiveService.class);
         Group group = CloudAPI.getInstance().getGroupPool().getGroup(service.getGroup());
 
-        if (CloudAPI.getInstance().getPlayerPool().getPlayers().stream().anyMatch(cloudPlayer -> cloudPlayer.getUsername().equalsIgnoreCase(event.getPlayer().getUsername()))){
+        if (CloudAPI.getInstance().getPlayerPool().getPlayers().stream().anyMatch(cloudPlayer -> cloudPlayer.getUsername().equalsIgnoreCase(event.getPlayer().getUsername()))) {
             event.getPlayer().disconnect(Component.text(CloudAPI.getInstance().getMessages().getMessages().get("kickAlreadyOnNetwork").replace("&", "§")));
         }
 
@@ -66,17 +65,17 @@ public class CloudConnectListener {
 
         if (group.isMaintenance()) {
             if (!server.getPlayer(event.getPlayer().getUniqueId()).get().hasPermission("metacloud.connection.maintenance")
-                    && !CloudAPI.getInstance().getWhitelist().contains(server.getPlayer(event.getPlayer().getUniqueId()).get().getUsername())){
+                    && !CloudAPI.getInstance().getWhitelist().contains(server.getPlayer(event.getPlayer().getUniqueId()).get().getUsername())) {
                 event.getPlayer().disconnect(Component.text(CloudAPI.getInstance().getMessages().getMessages().get("kickNetworkIsMaintenance").replace("&", "§")));
             }
-        }else {
+        } else {
             if (CloudAPI.getInstance().getPlayerPool().getPlayers().size() >= group.getMaxPlayers()
                     && !server.getPlayer(event.getPlayer().getUniqueId()).get().hasPermission("metacloud.connection.full")
-                    && !CloudAPI.getInstance().getWhitelist().contains(server.getPlayer(event.getPlayer().getUniqueId()).get().getUsername())){
+                    && !CloudAPI.getInstance().getWhitelist().contains(server.getPlayer(event.getPlayer().getUniqueId()).get().getUsername())) {
                 event.getPlayer().disconnect(Component.text(CloudAPI.getInstance().getMessages().getMessages().get("kickNetworkIsFull").replace("&", "§")));
 
-            }else if (server.getPlayer(event.getPlayer().getUniqueId()).isPresent()
-                    && VelocityBootstrap.getLobby( server.getPlayer(event.getPlayer().getUniqueId()).get()) == null){
+            } else if (server.getPlayer(event.getPlayer().getUniqueId()).isPresent()
+                    && VelocityBootstrap.getLobby(server.getPlayer(event.getPlayer().getUniqueId()).get()) == null) {
 
                 event.getPlayer().disconnect(Component.text(CloudAPI.getInstance().getMessages().getMessages().get("kickNoFallback").replace("&", "§")));
 
@@ -85,19 +84,19 @@ public class CloudConnectListener {
     }
 
     @Subscribe
-    public void handle(DisconnectEvent event){
+    public void handle(DisconnectEvent event) {
         if (this.connected.contains(event.getPlayer().getUniqueId())) {
             CloudAPI.getInstance().sendPacketSynchronized(new PacketInPlayerDisconnect(event.getPlayer().getUsername()));
         }
     }
 
     @Subscribe
-    public void handle(ServerConnectedEvent event){
+    public void handle(ServerConnectedEvent event) {
         CloudAPI.getInstance().sendPacketSynchronized(new PacketInPlayerSwitchService(event.getPlayer().getUsername(), event.getServer().getServerInfo().getName()));
     }
 
     @Subscribe
-    public void handle(KickedFromServerEvent event){
+    public void handle(KickedFromServerEvent event) {
         if (event.getPlayer().isActive()) {
             CloudService target = VelocityBootstrap.getLobby(event.getPlayer(), event.getServer().getServerInfo().getName());
             if (target != null) {

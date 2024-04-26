@@ -12,17 +12,18 @@ public class HandlePacketOutAPIPlayerDispactchCommand implements NettyAdaptor {
 
     @Override
     public void handle(Channel channel, Packet packet) {
-        if (packet instanceof PacketOutAPIPlayerDispactchCommand) {
-            var player = VelocityBootstrap.proxyServer.getPlayer(((PacketOutAPIPlayerDispactchCommand) packet).getUserName());
-            if (player.isEmpty()) {
-                return;
-            }
-            try {
-                VelocityBootstrap.proxyServer.getCommandManager().executeAsync(player.get(),
-                        ((PacketOutAPIPlayerDispactchCommand) packet).getCommand()).get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
+        if (!(packet instanceof PacketOutAPIPlayerDispactchCommand)) {
+            return;
+        }
+        var player = VelocityBootstrap.getProxyServer().getPlayer(((PacketOutAPIPlayerDispactchCommand) packet).getUserName());
+        if (player.isEmpty()) {
+            return;
+        }
+        try {
+            VelocityBootstrap.getProxyServer().getCommandManager().executeAsync(player.get(),
+                    ((PacketOutAPIPlayerDispactchCommand) packet).getCommand()).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
         }
     }
 }

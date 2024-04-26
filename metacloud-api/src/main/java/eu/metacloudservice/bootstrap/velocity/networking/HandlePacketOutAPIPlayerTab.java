@@ -11,13 +11,14 @@ public class HandlePacketOutAPIPlayerTab implements NettyAdaptor {
 
     @Override
     public void handle(Channel channel, Packet packet) {
-        if (packet instanceof PacketOutAPIPlayerTab) {
-            var player = VelocityBootstrap.proxyServer.getPlayer(((PacketOutAPIPlayerTab) packet).getUsername());
-            if (player.isEmpty()) {
-                return;
-            }
-            player.get().getTabList().setHeaderAndFooter(Component.text(((PacketOutAPIPlayerTab) packet).getHeader()), Component.text(((PacketOutAPIPlayerTab) packet).getFooter()));
+        if (!(packet instanceof PacketOutAPIPlayerTab)) {
+            return;
         }
+        var player = VelocityBootstrap.getProxyServer().getPlayer(((PacketOutAPIPlayerTab) packet).getUsername());
+        if (player.isEmpty()) {
+            return;
+        }
+        player.get().getTabList().setHeaderAndFooter(Component.text(((PacketOutAPIPlayerTab) packet).getHeader()), Component.text(((PacketOutAPIPlayerTab) packet).getFooter()));
 
     }
 }
